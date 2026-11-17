@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vanessa Oliveira · Fisioterapia</title>
-<meta name="description" content="Fisioterapia ortopédica, esportiva e pós-operatória. Avaliação precisa, tratamento guiado e retorno ao movimento sem dor.">
+<title>Vanessa Oliveira · Fisioterapeuta</title>
+<meta name="description" content="Fisioterapeuta especialista em traumato-ortopedia, pós-operatório e coluna. Avaliação detalhada e tratamento individual para você voltar a se mover sem dor.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -27,7 +27,7 @@
   --ease:cubic-bezier(.2,.7,.1,1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{background:var(--ink);color:#e9f1f7;font-family:var(--sans);font-weight:400;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 em{font-family:var(--serif);font-style:italic;font-weight:400}
@@ -195,7 +195,7 @@ img{max-width:100%;display:block}
 section.block{padding:clamp(88px,12vw,160px) clamp(16px,6vw,96px)}
 .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:12px;margin-bottom:28px}
 .kicker::before{content:"";width:28px;height:1px;background:currentColor}
-.h-sec{font-family:var(--serif);font-weight:400;font-size:clamp(40px,5.2vw,80px);line-height:1;letter-spacing:-.015em;max-width:15ch}
+.h-sec{font-family:var(--serif);font-weight:400;font-size:clamp(34px,5.2vw,80px);overflow-wrap:break-word;line-height:1;letter-spacing:-.015em;max-width:15ch}
 .h-sec em{color:#1f6f8b}
 .lead{font-size:clamp(16px,1.25vw,19px);line-height:1.75;color:#3a4657;max-width:52ch}
 
@@ -214,15 +214,15 @@ section.block{padding:clamp(88px,12vw,160px) clamp(16px,6vw,96px)}
 .stats span{display:block;margin-top:10px;font-size:13px;color:var(--muted);line-height:1.5}
 .signature{margin-top:36px;font-family:var(--serif);font-style:italic;font-size:30px;color:#1f6f8b}
 @media (max-width:900px){.about{grid-template-columns:1fr}.portrait{max-width:min(440px,64vh);width:100%}}
-@media (max-width:480px){.stats{gap:12px}.stats b{font-size:32px}.stats span{font-size:12px}.card{padding:32px 24px 36px}.card .idx{top:32px;right:24px}.quote{padding:28px 24px}summary{font-size:16px}}
+@media (max-width:480px){.stats{gap:12px}.stats b{font-size:clamp(26px,8vw,32px)}.portrait .badge{left:12px;right:12px;bottom:12px;padding:12px 14px;gap:10px}.stats span{font-size:12px}.card{padding:32px 24px 36px}.card .idx{top:32px;right:24px}.quote{padding:28px 24px}summary{font-size:16px}}
 section.block,.cta{padding-left:max(clamp(16px,6vw,96px),calc((100vw - 1440px)/2));padding-right:max(clamp(16px,6vw,96px),calc((100vw - 1440px)/2))}
 
 /* specialties */
 .spec-head{display:flex;justify-content:space-between;align-items:end;gap:40px;flex-wrap:wrap;margin-bottom:64px}
 .spec-head .lead{max-width:40ch}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.4vw,18px)}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(8px,1.4vw,18px)}
 .cards .card{border-radius:24px}
-.card{background:var(--paper);padding:40px 34px 44px;position:relative;min-height:300px;display:flex;flex-direction:column;transition:background .5s var(--ease),color .5s var(--ease)}
+.card{background:var(--paper);padding:40px 34px 44px;position:relative;min-height:280px;display:flex;flex-direction:column;transition:background .5s var(--ease),color .5s var(--ease)}
 .card .ic{width:52px;height:52px;border-radius:50%;border:1px solid var(--line-light);display:grid;place-items:center;margin-bottom:auto;transition:border-color .5s,transform .6s var(--ease)}
 .card .ic svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 .card h3{font-family:var(--serif);font-weight:400;font-size:30px;line-height:1.05;margin:48px 0 14px}
@@ -231,7 +231,6 @@ section.block,.cta{padding-left:max(clamp(16px,6vw,96px),calc((100vw - 1440px)/2
 .card:hover{background:var(--navy);color:var(--paper)}
 .card:hover p,.card:hover .idx{color:rgba(243,239,232,.65)}
 .card:hover .ic{border-color:var(--ice);transform:rotate(-12deg);color:var(--ice)}
-@media (max-width:1000px){.cards{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:640px){.cards{grid-template-columns:1fr}.card{min-height:auto}.card h3{margin-top:36px}}
 
 /* method */
@@ -277,12 +276,13 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
 /* ---------- CTA ---------- */
 .cta{position:relative;overflow:hidden;background:var(--ink);color:#e9f1f7;padding:clamp(100px,14vw,200px) clamp(16px,6vw,96px) 60px}
 .cta::before{content:"";position:absolute;width:900px;height:900px;right:-300px;top:-300px;border-radius:50%;background:radial-gradient(circle,rgba(143,233,255,.18),transparent 60%);pointer-events:none}
-.cta h2{font-family:var(--serif);font-weight:400;font-size:clamp(52px,9vw,148px);line-height:.92;letter-spacing:-.025em;max-width:12ch;position:relative}
+.cta h2{font-family:var(--serif);font-weight:400;font-size:clamp(44px,9vw,148px);line-height:.92;letter-spacing:-.025em;max-width:12ch;position:relative}
 .cta h2 em{color:var(--ice)}
 .cta .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:48px;position:relative}
 .info{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:clamp(80px,10vw,140px);padding-top:40px;border-top:1px solid var(--line-dark);position:relative}
 .info h5{font-family:var(--mono);font-weight:400;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ice);margin-bottom:14px}
 .info p{font-size:14.5px;line-height:1.75;color:rgba(233,241,247,.7)}
+.cta .btn-ghost{max-width:100%;overflow-wrap:anywhere}
 .info a{display:inline-block;padding:10px 0;min-height:44px;transition:color .3s}.info a:hover{color:var(--ice)}
 .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-top:80px;font-size:12px;color:rgba(233,241,247,.45);position:relative}
 @media (max-width:900px){.info{grid-template-columns:1fr 1fr}}
@@ -363,13 +363,13 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
 <!-- ============ NAV ============ -->
 <div class="progress" id="progress" aria-hidden="true"></div>
 <header class="nav" id="nav">
-  <a href="#top" class="brand" aria-label="Vanessa Oliveira Fisioterapia — início">
+  <a href="#top" class="brand" aria-label="Vanessa Oliveira, fisioterapeuta: início">
     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
       <circle cx="20" cy="20" r="19" opacity=".35"/>
       <path d="M14 9c2.5 0 3.5 2 3.5 4v14c0 2-1 4-3.5 4M26 9c-2.5 0-3.5 2-3.5 4v14c0 2 1 4 3.5 4" />
       <path d="M17.5 20h5" stroke="#8fe9ff"/>
     </svg>
-    <span><b>Vanessa Oliveira</b><small>Fisioterapia</small></span>
+    <span><b>Vanessa Oliveira</b><small>Fisioterapeuta</small></span>
   </a>
   <ul id="menu">
     <li><a href="#sobre">Sobre</a></li>
@@ -411,9 +411,9 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
 
     <div class="captions">
       <div class="cap hero" data-in="-1" data-out=".12">
-        <div class="eyebrow">Fisioterapia ortopédica &amp; esportiva</div>
+        <div class="eyebrow">Fisioterapeuta ortopédica</div>
         <h1>Seu corpo sabe <em>se reconstruir.</em></h1>
-        <p>A gente guia cada etapa — do diagnóstico ao primeiro passo sem dor — com um plano de reabilitação feito para o seu corpo, e não para um protocolo genérico.</p>
+        <p>Eu acompanho você do diagnóstico ao primeiro passo sem dor. O plano de reabilitação é montado para o seu caso, e não copiado de um protocolo pronto.</p>
         <div class="actions">
           <a href="#contato" class="btn btn-primary">Agendar avaliação
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
@@ -422,21 +422,21 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
       </div>
 
       <div class="cap heat" data-in=".15" data-out=".38">
-        <span class="num">01 — Diagnóstico</span>
+        <span class="num">01 · Diagnóstico</span>
         <h2>Entender a lesão <em>antes</em> de tratar.</h2>
-        <p>Avaliação física completa, leitura dos seus exames e testes funcionais. Sabemos exatamente onde está o problema — e o que ele está impedindo você de fazer.</p>
+        <p>Faço a avaliação física, leio seus exames e aplico testes funcionais. Assim fica claro onde está o problema e o que ele está te impedindo de fazer.</p>
       </div>
 
       <div class="cap" data-in=".41" data-out=".64">
-        <span class="num">02 — Reconstrução</span>
+        <span class="num">02 · Reconstrução</span>
         <h2>Cada fase da <em>cicatrização</em>, respeitada.</h2>
-        <p>Carga progressiva, terapia manual e recursos de eletrotermofototerapia aplicados no momento certo para estimular a consolidação e proteger o tecido.</p>
+        <p>Carga progressiva, terapia manual e eletrotermofototerapia entram na hora certa, para estimular a consolidação sem sobrecarregar o tecido.</p>
       </div>
 
       <div class="cap" data-in=".68" data-out="1.2">
-        <span class="num">03 — Movimento</span>
-        <h2>Força, amplitude e <em>confiança</em> de volta.</h2>
-        <p>Recuperamos a mobilidade articular, a força e o controle motor até você voltar a levantar peso, treinar e viver sem medo de se mexer.</p>
+        <span class="num">03 · Movimento</span>
+        <h2>Força e <em>confiança</em> de volta.</h2>
+        <p>O trabalho segue até a articulação voltar a mexer bem e você conseguir treinar, carregar peso e se movimentar sem medo.</p>
         <div class="actions" style="pointer-events:auto">
           <a href="#contato" class="btn btn-primary">Começar minha recuperação
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
@@ -450,8 +450,8 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
 
 <div class="marquee" aria-hidden="true">
   <div class="track">
-    <span>Ortopedia</span><span>Pós-operatório</span><span>Fisioterapia esportiva</span><span>Coluna &amp; postura</span><span>Pilates clínico</span><span>Terapia manual</span>
-    <span>Ortopedia</span><span>Pós-operatório</span><span>Fisioterapia esportiva</span><span>Coluna &amp; postura</span><span>Pilates clínico</span><span>Terapia manual</span>
+    <span>Ortopedia</span><span>Pós-operatório</span><span>Coluna &amp; postura</span><span>Terapia manual</span><span>Ortopedia</span><span>Pós-operatório</span><span>Coluna &amp; postura</span><span>Terapia manual</span>
+    <span>Ortopedia</span><span>Pós-operatório</span><span>Coluna &amp; postura</span><span>Terapia manual</span><span>Ortopedia</span><span>Pós-operatório</span><span>Coluna &amp; postura</span><span>Terapia manual</span>
   </div>
 </div>
 
@@ -468,8 +468,8 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
       <div>
         <div class="kicker reveal">Sobre</div>
         <h2 class="h-sec split">Reabilitação com <em>ciência</em> e cuidado de perto.</h2>
-        <p class="lead reveal d2">Sou fisioterapeuta especialista em traumato-ortopedia e fisioterapia esportiva. Atendo pessoas que querem voltar ao que amam fazer — seja correr uma maratona, pegar o filho no colo ou simplesmente subir escadas sem dor.</p>
-        <p class="lead reveal d3" style="margin-top:18px">Cada sessão é individual, com tempo de verdade dedicado a você, e cada evolução é medida — para que você veja o progresso, e não apenas sinta.</p>
+        <p class="lead reveal d2">Sou fisioterapeuta especialista em traumato-ortopedia. Atendo quem quer voltar a fazer o que gosta: correr, pegar o filho no colo ou só subir a escada sem sentir dor.</p>
+        <p class="lead reveal d3" style="margin-top:18px">As sessões são individuais e sem pressa. Eu meço cada evolução, então você acompanha o progresso nos números, e não só no corpo.</p>
         <div class="stats">
           <div class="reveal d1"><b data-count="12">0</b><span>anos de prática clínica</span></div>
           <div class="reveal d2"><b data-count="3400" data-suffix="+">0</b><span>pacientes reabilitados</span></div>
@@ -487,15 +487,13 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
         <div class="kicker reveal">Especialidades</div>
         <h2 class="h-sec split">Tratamentos para cada <em>fase</em> da recuperação.</h2>
       </div>
-      <p class="lead reveal d2">Da lesão aguda à prevenção, com protocolos baseados em evidência e ajustados a cada reavaliação.</p>
+      <p class="lead reveal d2">Da lesão recente à prevenção, com protocolos baseados em evidência que eu reviso a cada reavaliação.</p>
     </div>
     <div class="cards">
-      <article data-spot class="card reveal"><span class="idx">01</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M8 3c1.5 0 2 1.2 2 2.5v13c0 1.3-.5 2.5-2 2.5M16 3c-1.5 0-2 1.2-2 2.5v13c0 1.3.5 2.5 2 2.5M10 12h4"/></svg></div><h3>Traumato-ortopedia</h3><p>Fraturas, entorses, tendinites, lesões ligamentares e dores articulares — com foco em consolidação segura e função total.</p></article>
-      <article data-spot class="card reveal d1"><span class="idx">02</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 20l6-6M14 4l6 6-8 8-6-6 8-8zM9 9l6 6"/></svg></div><h3>Pós-operatório</h3><p>Reabilitação após cirurgias de joelho (LCA, menisco), ombro, quadril e coluna, em sintonia com o seu cirurgião.</p></article>
-      <article data-spot class="card reveal d2"><span class="idx">03</span><div class="ic"><svg viewBox="0 0 24 24"><circle cx="14" cy="4.5" r="1.8"/><path d="M6 21l3-6 3 2v4M9 15l2-6 4 3 3 1M11 9l-4 1-2 3"/></svg></div><h3>Fisioterapia esportiva</h3><p>Retorno ao esporte com testes de força e salto, prevenção de recidivas e otimização de performance.</p></article>
-      <article data-spot class="card reveal d1"><span class="idx">04</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M9 5h6M8.5 9h7M8 13h8M8.5 17h7"/></svg></div><h3>Coluna &amp; postura</h3><p>Lombalgia, cervicalgia, hérnia de disco e dores crônicas tratadas com terapia manual e exercício terapêutico.</p></article>
-      <article data-spot class="card reveal d2"><span class="idx">05</span><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.5 2.5 13.5 0 16"/></svg></div><h3>Pilates clínico</h3><p>Fortalecimento global, estabilidade e consciência corporal para manter os resultados a longo prazo.</p></article>
-      <article data-spot class="card reveal d3"><span class="idx">06</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></div><h3>Recursos terapêuticos</h3><p>Laser, ultrassom, TENS, liberação miofascial e bandagem funcional como aliados do tratamento ativo.</p></article>
+      <article data-spot class="card reveal"><span class="idx">01</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M8 3c1.5 0 2 1.2 2 2.5v13c0 1.3-.5 2.5-2 2.5M16 3c-1.5 0-2 1.2-2 2.5v13c0 1.3.5 2.5 2 2.5M10 12h4"/></svg></div><h3>Traumato-ortopedia</h3><p>Fraturas, entorses, tendinites, lesões de ligamento e dores nas articulações. O objetivo é consolidar com segurança e recuperar a função.</p></article>
+      <article data-spot class="card reveal d1"><span class="idx">02</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 20l6-6M14 4l6 6-8 8-6-6 8-8zM9 9l6 6"/></svg></div><h3>Pós-operatório</h3><p>Reabilitação depois de cirurgias de joelho (LCA, menisco), ombro, quadril e coluna, sempre combinada com o seu cirurgião.</p></article>
+      <article data-spot class="card reveal"><span class="idx">03</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M9 5h6M8.5 9h7M8 13h8M8.5 17h7"/></svg></div><h3>Coluna &amp; postura</h3><p>Lombalgia, cervicalgia, hérnia de disco e dor crônica, tratadas com terapia manual e exercício terapêutico.</p></article>
+      <article data-spot class="card reveal d1"><span class="idx">04</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></div><h3>Recursos terapêuticos</h3><p>Laser, ultrassom, TENS, liberação miofascial e bandagem funcional, usados junto com os exercícios.</p></article>
     </div>
   </section>
 
@@ -505,10 +503,10 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
     <h2 class="h-sec split">Um caminho claro, do <em>primeiro dia</em> à alta.</h2>
     <div class="timeline reveal" id="timeline">
       <div class="fill"></div>
-      <div class="step"><div class="dot">01</div><h4>Avaliação</h4><p>60 minutos de anamnese, exame físico, testes funcionais e análise dos seus exames de imagem.</p><small>Semana 1</small></div>
-      <div class="step"><div class="dot">02</div><h4>Plano</h4><p>Metas mensuráveis e cronograma de tratamento explicados de forma simples, sem jargão.</p><small>Semana 1</small></div>
-      <div class="step"><div class="dot">03</div><h4>Tratamento</h4><p>Sessões individuais com progressão de carga e reavaliações periódicas para ajustar o rumo.</p><small>Semanas 2 – 12</small></div>
-      <div class="step"><div class="dot">04</div><h4>Alta &amp; prevenção</h4><p>Programa de exercícios para casa e orientações para você não voltar a se lesionar.</p><small>Para a vida</small></div>
+      <div class="step"><div class="dot">01</div><h4>Avaliação</h4><p>Uma hora de conversa, exame físico, testes funcionais e leitura dos seus exames de imagem.</p><small>Semana 1</small></div>
+      <div class="step"><div class="dot">02</div><h4>Plano</h4><p>Metas que dá para medir e um cronograma explicado em português claro, sem termo técnico.</p><small>Semana 1</small></div>
+      <div class="step"><div class="dot">03</div><h4>Tratamento</h4><p>Sessões individuais, com carga aumentando aos poucos e reavaliações para corrigir o rumo quando preciso.</p><small>Semanas 2 a 12</small></div>
+      <div class="step"><div class="dot">04</div><h4>Alta &amp; prevenção</h4><p>Você recebe exercícios para fazer em casa e orientações para não se lesionar de novo.</p><small>Para a vida</small></div>
     </div>
   </section>
 
@@ -531,10 +529,10 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
         <h2 class="h-sec split">Perguntas <em>frequentes</em>.</h2>
       </div>
       <div class="reveal d1">
-        <details open><summary>Preciso de pedido médico para começar?<i></i></summary><p>Não é obrigatório. A fisioterapeuta pode realizar a avaliação diretamente. Se você tiver exames ou relatório médico, traga para a primeira consulta.</p></details>
-        <details><summary>Quanto tempo dura cada sessão?<i></i></summary><p>A avaliação dura cerca de 60 minutos e as sessões de tratamento, 50 minutos, sempre individuais.</p></details>
-        <details><summary>Vocês atendem convênio?<i></i></summary><p>O atendimento é particular, com emissão de recibo para reembolso junto ao seu plano de saúde.</p></details>
-        <details><summary>Fazem atendimento domiciliar?<i></i></summary><p>Sim, para pacientes em pós-operatório imediato ou com mobilidade reduzida, em regiões selecionadas.</p></details>
+        <details open><summary>Preciso de pedido médico para começar?<i></i></summary><p>Não. Eu posso fazer a avaliação direto. Se você tiver exames ou relatório médico, traga na primeira consulta.</p></details>
+        <details><summary>Quanto tempo dura cada sessão?<i></i></summary><p>A avaliação leva cerca de uma hora. As sessões de tratamento duram 50 minutos e são sempre individuais.</p></details>
+        <details><summary>Atende convênio?<i></i></summary><p>O atendimento é particular. Eu emito recibo para você pedir reembolso ao seu plano de saúde.</p></details>
+        <details><summary>Faz atendimento domiciliar?<i></i></summary><p>Sim, para quem está no pós-operatório imediato ou tem dificuldade de locomoção. Consulte se a sua região é atendida.</p></details>
       </div>
     </div>
   </section>
@@ -550,12 +548,12 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
     <a class="btn btn-ghost" href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a>
   </div>
   <div class="info">
-    <div class="reveal"><h5>Clínica</h5><p>Rua Exemplo, 123 — sala 45<br>Bairro · Cidade/UF</p></div>
-    <div class="reveal d1"><h5>Horários</h5><p>Seg a sex · 7h – 20h<br>Sábado · 8h – 12h</p></div>
+    <div class="reveal"><h5>Clínica</h5><p>Rua Exemplo, 123, sala 45<br>Bairro · Cidade/UF</p></div>
+    <div class="reveal d1"><h5>Horários</h5><p>Seg a sex · 7h às 20h<br>Sábado · 8h às 12h</p></div>
     <div class="reveal d2"><h5>Atendimento</h5><p>Presencial, domiciliar<br>e teleconsulta</p></div>
     <div class="reveal d3"><h5>Redes</h5><p><a href="#">Instagram</a><br><a href="#">LinkedIn</a></p></div>
   </div>
-  <div class="foot"><span>© 2026 Vanessa Oliveira Fisioterapia · CREFITO-0 000000-F</span><span>Responsável técnica: Drª Vanessa Oliveira</span></div>
+  <div class="foot"><span>© 2026 Vanessa Oliveira, Fisioterapeuta · CREFITO-0 000000-F</span><span>Responsável técnica: Drª Vanessa Oliveira</span></div>
 </section>
 
 <a class="wa-float" id="wa" href="https://wa.me/5500000000000" target="_blank" rel="noopener" aria-label="WhatsApp">
