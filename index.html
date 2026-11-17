@@ -83,14 +83,14 @@ img{max-width:100%;display:block}
 
 /* ---------- STORY (3D) ---------- */
 .story{position:relative;height:520vh}
-.sticky{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+.sticky{position:sticky;top:0;width:100%;height:100vh;height:100dvh;overflow:hidden}
 #scene{position:absolute;inset:0;width:100%;height:100%;display:block}
 .vignette{position:absolute;inset:0;pointer-events:none;background:
-  radial-gradient(ellipse 70% 80% at 65% 50%,transparent 40%,rgba(4,7,13,.85) 100%),
-  linear-gradient(180deg,rgba(4,7,13,.6),transparent 20%,transparent 80%,rgba(4,7,13,.9));}
+  radial-gradient(ellipse 95% 100% at 62% 50%,transparent 55%,rgba(4,7,13,.6) 100%),
+  linear-gradient(180deg,rgba(4,7,13,.45),transparent 16%,transparent 84%,rgba(4,7,13,.75));}
 .grid{position:absolute;inset:0;pointer-events:none;opacity:.5;
   background-image:linear-gradient(var(--line-dark) 1px,transparent 1px),linear-gradient(90deg,var(--line-dark) 1px,transparent 1px);
-  background-size:80px 80px;mask-image:radial-gradient(ellipse 60% 70% at 65% 50%,#000 10%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse 60% 70% at 65% 50%,#000 10%,transparent 75%)}
+  background-size:80px 80px;mask-image:radial-gradient(ellipse 85% 90% at 60% 50%,#000 25%,transparent 95%);-webkit-mask-image:radial-gradient(ellipse 85% 90% at 60% 50%,#000 25%,transparent 95%)}
 .flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 62% 55%,rgba(201,245,255,.9),rgba(143,233,255,.25) 30%,transparent 65%);mix-blend-mode:screen}
 .grain{position:absolute;inset:-50%;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -152,7 +152,7 @@ img{max-width:100%;display:block}
   .steps div::before{width:100%}
   .scroll-hint{display:none}
   .cap .actions .btn{padding:12px 18px}
-  .vignette{background:linear-gradient(180deg,rgba(4,7,13,.55),transparent 22%,transparent 42%,rgba(4,7,13,.94) 74%)}
+  .vignette{background:linear-gradient(180deg,rgba(4,7,13,.4),transparent 14%,transparent 46%,rgba(4,7,13,.88) 76%)}
 }
 
 @media (max-width:480px){
@@ -1042,15 +1042,18 @@ function init(){
     scan.lookAt(camera.position.x, scan.position.y, camera.position.z);
 
     /* ---- camera ---- */
-    const D0 = wide ? 21 : 27;
+    // fit the whole arm to the viewport: by height (≈9.6u + margin) and, in narrow screens, by width (≈5u)
+    const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov/2));
+    const D0 = Math.max((wide ? 10.4 : 11.2) / (2*tanH), (wide ? 0 : 5.4) / (2*tanH*aspect));
     const zoom = smooth(.12,.34,p) * (1 - smooth(.55,.72,p));
     const mv = smooth(.68,.92,p);
     const dist = lerp(D0, D0*.44, zoom) * (1 - flash*.04) * (1 - (wide ? .18 : -.08)*mv);
     const kk = dist / D0;
     const focusY = lerp(lerp(-.1, wide ? 1.9 : 1.1, mv), fracWorld.y, zoom);
     const focusX = lerp(0, fracWorld.x, zoom*.8);
-    const offX = wide ? Math.min(3.6, 1.6 + (aspect-1)*2.4) * kk : 0;
-    const offY = wide ? 0 : -2.6 * kk;
+    const visW = 2*tanH*D0*aspect;
+    const offX = wide ? Math.min(visW*.22, 1.2 + (aspect-1)*2.2) * kk : 0;
+    const offY = wide ? 0 : -1.4 * kk;
     mouse.sx += (mouse.x - mouse.sx)*.05; mouse.sy += (mouse.y - mouse.sy)*.05;
     const shake = reduce ? 0 : flash*.06;
     camTarget.set(focusX - offX, focusY + offY, 0);
