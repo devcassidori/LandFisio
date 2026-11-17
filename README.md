@@ -64,6 +64,7 @@ Dentro do `index.html`:
 |---|---|
 | **Three.js 0.160.0** (jsDelivr, via import map) | Renderização WebGL, geometrias procedurais |
 | `EffectComposer` + `UnrealBloomPass` + `OutputPass` | Brilho (bloom) do raio-x |
+| `MarchingCubes` (addon) + Web Workers | Malhas dos ossos geradas a partir de campos de distância |
 | GLSL customizado (`ShaderMaterial`) | Material de raio-x, brilhos e linha do scanner |
 | CSS puro | Layout, animações de entrada, grão de filme, marquee |
 | `IntersectionObserver` | Reveals das seções e pausa da renderização fora da tela |
@@ -97,20 +98,21 @@ O HUD (consolidação %, amplitude do cotovelo em graus e status clínico) é de
 
 ### Anatomia procedural
 
-Nenhum modelo 3D é carregado — todos os ossos são gerados em código:
+Nenhum modelo 3D é baixado — os ossos são **esculpidos em código** e convertidos em malha no carregamento:
 
-- **`bone(len, rShaft, rTop, rBot, opts)`** cria um osso longo com `LatheGeometry` a partir de um perfil de raio (diáfise fina, epífises largas via gaussianas, extremidades arredondadas). Opções:
-  - `sxT/szT/sxB/szB` — alargam/achatam cada extremidade (ex.: úmero distal largo e achatado);
-  - `bend` — curvatura da diáfise (arco lateral do rádio);
-  - `rough` — irregularidade orgânica da superfície;
-  - `t0/t1` + `cut` + `ph` — gera apenas um trecho do osso com a **linha de fratura serrilhada** (soma de senoides no ângulo), garantindo que as duas partes se encaixem.
+1. **Campos de distância (SDF)**: cada osso é uma função `d(x, y, z)` montada a partir de primitivas anatômicas — cápsulas cônicas encadeadas (diáfises), elipsoides (cabeças, tubérculos, epicôndilos, ossos do carpo), um "carretel" (tróclea) e um polígono extrudado (lâmina da escápula). As peças são unidas com **união suave** (`smin`) e cavadas com **subtração suave** (fossas, sulco bicipital, incisura troclear, fóvea da cabeça do rádio). Uma leve irregularidade senoidal (`grain`) evita a aparência de CG perfeito.
+2. **Amostragem em Web Workers**: o código das SDFs (`SDF_LIB`) roda em até 4 workers em paralelo. Cada campo é amostrado numa grade ajustada à caixa do osso, com **banda estreita**: uma grade grossa (passo 4) decide quais células estão perto da superfície; só elas são avaliadas exatamente, o resto é interpolado. Sem suporte a workers, o mesmo código roda na thread principal.
+3. **Malha**: o campo volta como `Float32Array` transferível e o `MarchingCubes` do Three.js (`three/addons/objects/MarchingCubes.js`) gera os triângulos. As posições são reescaladas para a caixa do osso e as normais (gradiente do campo) são corrigidas para a grade esticada.
+
+O esqueleto completo fica pronto em cerca de 2 s sem travar a página (pior pausa da thread principal ≈ 125 ms, medido em desktop).
+
 - **Membro superior esquerdo** (vista anterior, lateral = +x):
-  - Escápula (`ExtrudeGeometry`), espinha, acrômio, **processo coracoide** e clavícula;
-  - Úmero com cabeça, tubérculos maior/menor, **tuberosidade deltoide**, epicôndilos, capítulo e **tróclea em forma de carretel**;
-  - Ulna com **incisura troclear em "C"** (toro parcial: olécrano + coronoide) e processo estiloide;
-  - Rádio com arco lateral, **tuberosidade radial**, extremidade distal larga e estiloide;
-  - 8 ossos do carpo com formas distintas + pisiforme, 5 metacarpos e falanges articuladas.
-- **Fratura da cabeça do rádio (tipo Mason II)**: a cabeça é dividida em duas cunhas (`CylinderGeometry` com `thetaStart/thetaLength`), uma delas desviada; o colo tem traço serrilhado.
+  - Escápula com borda lateral, espinha, acrômio, **processo coracoide**, colo e **cavidade glenoide** escavada pela cabeça do úmero; clavícula em "S";
+  - Úmero com cabeça, colo, tubérculos maior/menor, **sulco bicipital**, **tuberosidade deltoide**, crista supracondilar, epicôndilos, **tróclea em carretel**, capítulo e **fossas do olécrano e coronoide**;
+  - Ulna com **olécrano e processo coronoide formando a incisura troclear** (cavada pela própria tróclea), incisura radial, crista interóssea e processo estiloide;
+  - Rádio com cabeça em disco e **fóvea côncava**, colo, **tuberosidade radial**, crista interóssea, extremidade distal larga com faceta articular e estiloide;
+  - 9 ossos do carpo (incluindo pisiforme e hâmulo do hamato), 5 metacarpos e falanges com base, diáfise e cabeça — as falanges distais terminam em **tufo** achatado.
+- **Fratura da cabeça do rádio (tipo Mason II)**: a mesma SDF do rádio é cortada por uma superfície serrilhada no colo e a cabeça é dividida por um plano oblíquo irregular — as peças se encaixam exatamente.
 - **Hierarquia de articulações**: `girdle → shoulder → elbow → forearm (eixo de prono-supinação) → wrist → dedos (3 falanges com pivô próprio)`. A função `setHand(c)` fecha a mão em punho.
 - **Pele** translúcida com perfis de lathe (deltoide, bíceps, massa do antebraço) e cápsulas nos dedos.
 
@@ -138,6 +140,23 @@ Brilhos (`makeGlow`) usam o fresnel invertido para um halo suave; o scanner é u
 - Em paisagem (`aspect > 1.05`) o braço fica deslocado para a direita, deixando a coluna de texto à esquerda; em retrato fica centralizado e mais alto, com o texto embaixo.
 - Zoom para o cotovelo na fase de diagnóstico/reconstrução, reenquadramento na fase de movimento e leve paralaxe com o mouse.
 
+## Efeitos de interface
+
+Inspirados em padrões populares do 21st.dev, mas implementados em HTML/CSS/JS puro (o site não usa React/Tailwind):
+
+| Efeito | Onde | Como |
+|---|---|---|
+| Barra de progresso de leitura | Topo da página | `#progress` com `scaleX` pelo scroll |
+| Texto com brilho | Palavra em destaque do título | Gradiente animado com `background-clip: text` |
+| Spotlight | Cards de especialidades e depoimentos (`[data-spot]`) | Gradiente radial que segue o ponteiro via variáveis CSS `--x`/`--y` |
+| Borda animada (*border beam*) | Foto e depoimento principal (`.beam`) | `conic-gradient` com ângulo `@property --beam` mascarado na borda |
+| Botões magnéticos + reflexo | Botões do hero e do contato | `translate` proporcional ao ponteiro; faixa de luz no hover |
+| Aurora | Fundo da seção de contato | Dois gradientes radiais flutuando |
+| Pulso nas etapas | Linha do tempo do método | `box-shadow` animado em sequência |
+| Bordas esmaecidas | Faixa de especialidades | `mask-image` linear |
+
+Os efeitos de ponteiro só ligam com mouse (`hover: hover` e `pointer: fine`); em telas de toque os estados de hover não "grudam". Todos respeitam `prefers-reduced-motion`.
+
 ## Seções da página
 
 1. **Hero / história em 3D** — com HUD estilo exame de imagem e legendas que aparecem por faixa de scroll (`data-in` / `data-out`).
@@ -152,7 +171,7 @@ Brilhos (`makeGlow`) usam o fresnel invertido para um halo suave; o scanner é u
 
 ## Responsividade
 
-Testado em 320×568, 375×812, 768×1024, 780×360 (celular deitado), 1280×720 e telas largas, sem rolagem horizontal.
+Testado em 320×640, 375×812, 768×1024, 1024×768, 780×360 (celular deitado), 1280×720, 1440×900 e 1920×1080, sem rolagem horizontal. Alvos de toque dos links do rodapé têm no mínimo 44px.
 
 | Breakpoint | Ajustes |
 |---|---|

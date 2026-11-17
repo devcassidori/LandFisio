@@ -220,7 +220,8 @@ section.block,.cta{padding-left:max(clamp(16px,6vw,96px),calc((100vw - 1440px)/2
 /* specialties */
 .spec-head{display:flex;justify-content:space-between;align-items:end;gap:40px;flex-wrap:wrap;margin-bottom:64px}
 .spec-head .lead{max-width:40ch}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-light);border:1px solid var(--line-light);border-radius:28px;overflow:hidden}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.4vw,18px)}
+.cards .card{border-radius:24px}
 .card{background:var(--paper);padding:40px 34px 44px;position:relative;min-height:300px;display:flex;flex-direction:column;transition:background .5s var(--ease),color .5s var(--ease)}
 .card .ic{width:52px;height:52px;border-radius:50%;border:1px solid var(--line-light);display:grid;place-items:center;margin-bottom:auto;transition:border-color .5s,transform .6s var(--ease)}
 .card .ic svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
@@ -282,9 +283,62 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
 .info{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:clamp(80px,10vw,140px);padding-top:40px;border-top:1px solid var(--line-dark);position:relative}
 .info h5{font-family:var(--mono);font-weight:400;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ice);margin-bottom:14px}
 .info p{font-size:14.5px;line-height:1.75;color:rgba(233,241,247,.7)}
+.info a{display:inline-block;padding:10px 0;min-height:44px;transition:color .3s}.info a:hover{color:var(--ice)}
 .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-top:80px;font-size:12px;color:rgba(233,241,247,.45);position:relative}
 @media (max-width:900px){.info{grid-template-columns:1fr 1fr}}
 @media (max-width:520px){.info{grid-template-columns:1fr}}
+
+/* ---------- FX (21st-style: spotlight, shine, beam, magnetic) ---------- */
+@property --beam{syntax:'<angle>';initial-value:0deg;inherits:false}
+.progress{position:fixed;left:0;top:0;height:2px;width:100%;z-index:70;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--heat),var(--ice) 40%,#fff);box-shadow:0 0 12px rgba(143,233,255,.7);pointer-events:none}
+/* shimmering accent word */
+.cap h1 em{background:linear-gradient(110deg,var(--ice-2) 35%,#fff 48%,var(--ice) 52%,var(--ice-2) 65%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 5s var(--ease) infinite;padding-right:.08em}
+@keyframes shine{0%{background-position:120% 0}60%,100%{background-position:-120% 0}}
+/* buttons: light sweep + magnetic offset (translate is set from JS) */
+.btn{position:relative;overflow:hidden;isolation:isolate;transition:transform .35s var(--ease),translate .45s var(--ease),background .35s,color .35s,box-shadow .35s}
+.btn-primary::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.65) 50%,transparent 70%);transform:translateX(-120%);transition:transform .8s var(--ease)}
+.btn-primary:hover::after{transform:translateX(120%)}
+/* spotlight that follows the pointer */
+[data-spot]{--x:50%;--y:50%}
+[data-spot]::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s;z-index:0;
+  background:radial-gradient(420px circle at var(--x) var(--y),var(--spot,rgba(143,233,255,.16)),transparent 45%)}
+[data-spot]:hover::before{opacity:1}
+.card>*{position:relative;z-index:1}
+.card .idx{position:absolute}
+.card{--spot:rgba(143,233,255,.22)}
+.quote{position:relative;overflow:hidden;--spot:rgba(31,111,139,.1)}
+.quote>*{position:relative;z-index:1}
+.quote.big{--spot:rgba(143,233,255,.18)}
+/* animated border beam */
+.beam{position:relative}
+.beam::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;z-index:2;
+  background:conic-gradient(from var(--beam),transparent 0 72%,rgba(143,233,255,.9) 86%,#fff 90%,transparent 96%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:beam 6s linear infinite}
+@keyframes beam{to{--beam:360deg}}
+/* marquee edges fade */
+.marquee{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.marquee .track span:hover{color:var(--ice)}
+/* drifting aurora behind the final CTA */
+.cta::before{animation:drift 18s ease-in-out infinite alternate}
+.cta::after{content:"";position:absolute;width:700px;height:700px;left:-260px;bottom:-320px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,90,78,.1),transparent 60%);animation:drift 22s ease-in-out infinite alternate-reverse}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-12%,10%) scale(1.15)}}
+/* step dots pulse when the timeline appears */
+.timeline.in .step .dot{animation:pulse 2.4s var(--ease) both}
+.timeline.in .step:nth-child(3) .dot{animation-delay:.35s}.timeline.in .step:nth-child(4) .dot{animation-delay:.7s}.timeline.in .step:nth-child(5) .dot{animation-delay:1.05s}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(31,111,139,.45)}70%{box-shadow:0 0 0 14px rgba(31,111,139,0)}100%{box-shadow:0 0 0 0 rgba(31,111,139,0)}}
+/* touch screens: no sticky hover states */
+@media (hover:none){
+  .card:hover{background:var(--paper);color:inherit}
+  .card:hover p,.card:hover .idx{color:var(--muted)}
+  .card:hover .ic{border-color:var(--line-light);transform:none;color:inherit}
+  [data-spot]::before,.btn-primary::after{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .cap h1 em,.beam::after,.cta::before,.cta::after,.timeline.in .step .dot{animation:none}
+  .btn-primary::after{display:none}
+}
 
 /* reveal */
 .reveal{opacity:0;transform:translateY(36px);transition:opacity 1.1s var(--ease),transform 1.1s var(--ease)}
@@ -307,6 +361,7 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
 <body>
 
 <!-- ============ NAV ============ -->
+<div class="progress" id="progress" aria-hidden="true"></div>
 <header class="nav" id="nav">
   <a href="#top" class="brand" aria-label="Vanessa Oliveira Fisioterapia — início">
     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
@@ -405,7 +460,7 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
   <!-- ============ SOBRE ============ -->
   <section class="block" id="sobre">
     <div class="about">
-      <div class="portrait reveal">
+      <div class="portrait reveal beam">
         <!-- Substitua por <img src="foto.jpg" alt="Drª Vanessa Oliveira"> -->
         <div class="ph">VO</div>
         <div class="badge"><div><b>Drª Vanessa Oliveira</b><span>CREFITO-0 000000-F</span></div><span>Desde 2013</span></div>
@@ -435,12 +490,12 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
       <p class="lead reveal d2">Da lesão aguda à prevenção, com protocolos baseados em evidência e ajustados a cada reavaliação.</p>
     </div>
     <div class="cards">
-      <article class="card reveal"><span class="idx">01</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M8 3c1.5 0 2 1.2 2 2.5v13c0 1.3-.5 2.5-2 2.5M16 3c-1.5 0-2 1.2-2 2.5v13c0 1.3.5 2.5 2 2.5M10 12h4"/></svg></div><h3>Traumato-ortopedia</h3><p>Fraturas, entorses, tendinites, lesões ligamentares e dores articulares — com foco em consolidação segura e função total.</p></article>
-      <article class="card reveal d1"><span class="idx">02</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 20l6-6M14 4l6 6-8 8-6-6 8-8zM9 9l6 6"/></svg></div><h3>Pós-operatório</h3><p>Reabilitação após cirurgias de joelho (LCA, menisco), ombro, quadril e coluna, em sintonia com o seu cirurgião.</p></article>
-      <article class="card reveal d2"><span class="idx">03</span><div class="ic"><svg viewBox="0 0 24 24"><circle cx="14" cy="4.5" r="1.8"/><path d="M6 21l3-6 3 2v4M9 15l2-6 4 3 3 1M11 9l-4 1-2 3"/></svg></div><h3>Fisioterapia esportiva</h3><p>Retorno ao esporte com testes de força e salto, prevenção de recidivas e otimização de performance.</p></article>
-      <article class="card reveal d1"><span class="idx">04</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M9 5h6M8.5 9h7M8 13h8M8.5 17h7"/></svg></div><h3>Coluna &amp; postura</h3><p>Lombalgia, cervicalgia, hérnia de disco e dores crônicas tratadas com terapia manual e exercício terapêutico.</p></article>
-      <article class="card reveal d2"><span class="idx">05</span><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.5 2.5 13.5 0 16"/></svg></div><h3>Pilates clínico</h3><p>Fortalecimento global, estabilidade e consciência corporal para manter os resultados a longo prazo.</p></article>
-      <article class="card reveal d3"><span class="idx">06</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></div><h3>Recursos terapêuticos</h3><p>Laser, ultrassom, TENS, liberação miofascial e bandagem funcional como aliados do tratamento ativo.</p></article>
+      <article data-spot class="card reveal"><span class="idx">01</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M8 3c1.5 0 2 1.2 2 2.5v13c0 1.3-.5 2.5-2 2.5M16 3c-1.5 0-2 1.2-2 2.5v13c0 1.3.5 2.5 2 2.5M10 12h4"/></svg></div><h3>Traumato-ortopedia</h3><p>Fraturas, entorses, tendinites, lesões ligamentares e dores articulares — com foco em consolidação segura e função total.</p></article>
+      <article data-spot class="card reveal d1"><span class="idx">02</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 20l6-6M14 4l6 6-8 8-6-6 8-8zM9 9l6 6"/></svg></div><h3>Pós-operatório</h3><p>Reabilitação após cirurgias de joelho (LCA, menisco), ombro, quadril e coluna, em sintonia com o seu cirurgião.</p></article>
+      <article data-spot class="card reveal d2"><span class="idx">03</span><div class="ic"><svg viewBox="0 0 24 24"><circle cx="14" cy="4.5" r="1.8"/><path d="M6 21l3-6 3 2v4M9 15l2-6 4 3 3 1M11 9l-4 1-2 3"/></svg></div><h3>Fisioterapia esportiva</h3><p>Retorno ao esporte com testes de força e salto, prevenção de recidivas e otimização de performance.</p></article>
+      <article data-spot class="card reveal d1"><span class="idx">04</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M9 5h6M8.5 9h7M8 13h8M8.5 17h7"/></svg></div><h3>Coluna &amp; postura</h3><p>Lombalgia, cervicalgia, hérnia de disco e dores crônicas tratadas com terapia manual e exercício terapêutico.</p></article>
+      <article data-spot class="card reveal d2"><span class="idx">05</span><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.5 2.5 13.5 0 16"/></svg></div><h3>Pilates clínico</h3><p>Fortalecimento global, estabilidade e consciência corporal para manter os resultados a longo prazo.</p></article>
+      <article data-spot class="card reveal d3"><span class="idx">06</span><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></div><h3>Recursos terapêuticos</h3><p>Laser, ultrassom, TENS, liberação miofascial e bandagem funcional como aliados do tratamento ativo.</p></article>
     </div>
   </section>
 
@@ -462,9 +517,9 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
     <div class="kicker reveal">Depoimentos</div>
     <h2 class="h-sec split">Quem voltou a se <em>mover</em>.</h2>
     <div class="quotes">
-      <figure class="quote big reveal"><div class="stars">★★★★★</div><blockquote>“Fraturei a cabeça do rádio numa queda de bike e mal conseguia girar o antebraço. Hoje já voltei a praticar Jiu-Jitsu normalmente.”</blockquote><footer><div class="av">L</div><div>Lucas C.<span>Fratura da cabeça do rádio</span></div></footer></figure>
-      <figure class="quote reveal d1"><div class="stars">★★★★★</div><blockquote>“Atenção total em cada sessão. Eu entendia o porquê de cada exercício.”</blockquote><footer><div class="av">C</div><div>Camila S.<span>Pós-op. de LCA</span></div></footer></figure>
-      <figure class="quote reveal d2"><div class="stars">★★★★★</div><blockquote>“Dez anos de dor lombar e, finalmente, um tratamento que funcionou.”</blockquote><footer><div class="av">J</div><div>João P.<span>Lombalgia crônica</span></div></footer></figure>
+      <figure data-spot class="quote big reveal beam"><div class="stars">★★★★★</div><blockquote>“Fraturei a cabeça do rádio numa queda de bike e mal conseguia girar o antebraço. Hoje já voltei a praticar Jiu-Jitsu normalmente.”</blockquote><footer><div class="av">L</div><div>Lucas C.<span>Fratura da cabeça do rádio</span></div></footer></figure>
+      <figure data-spot class="quote reveal d1"><div class="stars">★★★★★</div><blockquote>“Atenção total em cada sessão. Eu entendia o porquê de cada exercício.”</blockquote><footer><div class="av">C</div><div>Camila S.<span>Pós-op. de LCA</span></div></footer></figure>
+      <figure data-spot class="quote reveal d2"><div class="stars">★★★★★</div><blockquote>“Dez anos de dor lombar e, finalmente, um tratamento que funcionou.”</blockquote><footer><div class="av">J</div><div>João P.<span>Lombalgia crônica</span></div></footer></figure>
     </div>
   </section>
 
@@ -569,6 +624,23 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
     nav.classList.toggle('light', lr.top<70 && lr.bottom>70);
     wa.classList.toggle('show', lr.top<innerHeight*0.8 && cta.getBoundingClientRect().top>innerHeight*0.5);
   }
+  const bar=document.getElementById('progress');
+  const onProgress=()=>{ const max=document.documentElement.scrollHeight-innerHeight; bar.style.transform='scaleX('+(max>0?scrollY/max:0)+')'; };
+  addEventListener('scroll',onProgress,{passive:true}); addEventListener('resize',onProgress); onProgress();
+
+  // pointer-driven FX only on real mice and when motion is allowed
+  const fine = matchMedia('(hover:hover) and (pointer:fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (fine) {
+    document.querySelectorAll('[data-spot]').forEach(el=>el.addEventListener('pointermove',e=>{
+      const r=el.getBoundingClientRect(); el.style.setProperty('--x',(e.clientX-r.left)+'px'); el.style.setProperty('--y',(e.clientY-r.top)+'px');
+    }));
+    document.querySelectorAll('.cap .btn, .cta .btn').forEach(b=>{
+      b.addEventListener('pointermove',e=>{ const r=b.getBoundingClientRect();
+        b.style.translate=((e.clientX-r.left-r.width/2)*.22).toFixed(1)+'px '+((e.clientY-r.top-r.height/2)*.35).toFixed(1)+'px'; });
+      b.addEventListener('pointerleave',()=>{ b.style.translate=''; });
+    });
+  }
+
   addEventListener('scroll',onScroll,{passive:true}); onScroll();
 })();
 </script>
@@ -579,6 +651,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js';
 
 const canvas = document.getElementById('scene');
 const story = document.querySelector('.story');
@@ -698,41 +771,190 @@ function init(){
   const sphere = (r, x,y,z, sx=1,sy=1,sz=1, m=boneMat)=>{ const s=mesh(new THREE.SphereGeometry(r,28,20), m); s.position.set(x,y,z); s.scale.set(sx,sy,sz); return s; };
   const marrow = (len, r, x, y)=>{ const m=mesh(new THREE.CylinderGeometry(r,r,len,20,1,true), marrowMat); m.position.set(x,y,0); return m; };
 
+  const root = new THREE.Group(); scene.add(root);
+
+  /* ---------- SDF sculpting → MarchingCubes meshes ----------
+     Each bone is a signed-distance field built from anatomical primitives
+     (tapered capsules, ellipsoids, spools) joined with smooth unions and
+     carved with smooth subtractions. The fields are sampled in Web Workers
+     (narrow band, in parallel) and polygonised on the main thread with
+     THREE's MarchingCubes, so the page never freezes while bones are built. */
+  const SDF_LIB = `
+  const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+  const sminK=(a,b,k)=>{ const h=Math.max(k-Math.abs(a-b),0)/k; return Math.min(a,b)-h*h*k*.25; };
+  const smaxK=(a,b,k)=>-sminK(-a,-b,k);
+  const sdSphere=(x,y,z,cx,cy,cz,r)=>Math.hypot(x-cx,y-cy,z-cz)-r;
+  function sdEll(x,y,z,cx,cy,cz,rx,ry,rz){ x-=cx; y-=cy; z-=cz;
+    const k0=Math.hypot(x/rx,y/ry,z/rz), k1=Math.hypot(x/(rx*rx),y/(ry*ry),z/(rz*rz));
+    return k1>1e-9 ? k0*(k0-1)/k1 : -Math.min(rx,ry,rz); }
+  function sdCone(px,py,pz,a,b,r1,r2){ // tapered capsule (round cone)
+    const bax=b[0]-a[0], bay=b[1]-a[1], baz=b[2]-a[2];
+    const l2=bax*bax+bay*bay+baz*baz, rr=r1-r2, a2=l2-rr*rr, il2=1/l2;
+    const pax=px-a[0], pay=py-a[1], paz=pz-a[2];
+    const y=pax*bax+pay*bay+paz*baz, z=y-l2;
+    const qx=pax*l2-bax*y, qy=pay*l2-bay*y, qz=paz*l2-baz*y;
+    const x2=qx*qx+qy*qy+qz*qz, y2=y*y*l2, z2=z*z*l2, k=Math.sign(rr)*rr*rr*x2;
+    if(Math.sign(z)*a2*z2>k) return Math.sqrt(x2+z2)*il2-r2;
+    if(Math.sign(y)*a2*y2<k) return Math.sqrt(x2+y2)*il2-r1;
+    return (Math.sqrt(x2*a2*il2)+y*rr)*il2-r1; }
+  function sdChain(x,y,z,k,blend=.05){ let d=1e9; for(let i=0;i<k.length-1;i++) d=sminK(d,sdCone(x,y,z,k[i],k[i+1],k[i][3],k[i+1][3]),blend); return d; }
+  function sdSpool(x,y,z,cx,cy,cz,halfW,rMid,rEdge){ const dx=x-cx, t=Math.min(Math.abs(dx)/halfW,1), r=rMid+(rEdge-rMid)*t*t;
+    return smaxK(Math.hypot(y-cy,z-cz)-r, Math.abs(dx)-halfW, .04); }
+  function sdPoly2(x,y,V){ let d=(x-V[0][0])**2+(y-V[0][1])**2, s=1;
+    for(let i=0,j=V.length-1;i<V.length;j=i,i++){ const ex=V[j][0]-V[i][0], ey=V[j][1]-V[i][1], wx=x-V[i][0], wy=y-V[i][1];
+      const t=clamp((wx*ex+wy*ey)/Math.max(ex*ex+ey*ey,1e-9)), bx=wx-ex*t, by=wy-ey*t; d=Math.min(d,bx*bx+by*by);
+      const c1=y>=V[i][1], c2=y<V[j][1], c3=ex*wy>ey*wx; if((c1&&c2&&c3)||(!c1&&!c2&&!c3)) s=-s; }
+    return s*Math.sqrt(d); }
+  const grain=(x,y,z)=>.004*Math.sin(x*41+y*13)*Math.sin(z*37+y*17)+.003*Math.sin(y*63+x*29+z*23);
+
+  const CUT=-.3, TROCH_Y=-3.54;
+  function RAD(x,y,z){
+    let d=sdChain(x,y,z,[[.19,-.2,.02,.075],[.19,-.42,.02,.075],[.22,-1.4,.01,.085],[.22,-2.4,0,.1],[.23,-2.8,0,.14]],.06);
+    const hx=x-.19, hy=y+.13, hz=z-.02, dd=Math.hypot(hx,hz)-.13, dh=Math.abs(hy)-.055;
+    d=sminK(d, Math.min(Math.max(dd,dh),0)+Math.hypot(Math.max(dd,0),Math.max(dh,0))-.025, .05);   // radial head
+    d=smaxK(d,-sdSphere(x,y,z,.19,.11,.06,.15),.02);                                                // fovea
+    d=sminK(d,sdEll(x,y,z,.13,-.62,.03,.055,.12,.06),.05);                                          // radial tuberosity
+    d=sminK(d,sdChain(x,y,z,[[.16,-.9,.05,.02],[.15,-2.2,.04,.015]]),.05);                          // interosseous crest
+    d=sminK(d,sdEll(x,y,z,.22,-2.86,0,.23,.13,.13),.08);                                            // distal end
+    d=sminK(d,sdChain(x,y,z,[[.38,-2.82,0,.06],[.44,-3.04,0,.03]]),.05);                            // styloid
+    d=smaxK(d,-sdEll(x,y,z,.17,-3.13,0,.22,.1,.13),.03);                                            // carpal facet
+    return d; }
+  const cutAt=(x,z)=>CUT+.03*Math.sin((x-.19)*45+1)+.025*Math.cos((z-.02)*38)+.015*Math.sin((x+z)*70);
+  const splitAt=(x,y,z)=>(x-.19)*Math.cos(.7)+(z-.02)*Math.sin(.7)-.02+.012*Math.sin(y*90);
+  const RAD_UP=(x,y,z)=>Math.max(RAD(x,y,z),cutAt(x,z)-y);
+  const CARPALS=[[.2,-.1,.01,.1,.06,.06],[.06,-.09,0,.07,.065,.06],[-.07,-.1,-.01,.065,.06,.055],[-.12,-.11,.07,.045,.045,.04],
+    [.24,-.27,.03,.07,.07,.06],[.12,-.28,0,.055,.06,.05],[.01,-.27,0,.065,.1,.06],[-.12,-.26,0,.07,.09,.06],[-.13,-.27,.08,.03,.04,.04]];
+
+  const BONES={
+    girdle:(poly)=>(x,y,z)=>{                                   // scapula, spine, acromion, coracoid, glenoid, clavicle
+      const d2=sdPoly2(x,y,poly), th=.022+.03*clamp((x+.9)/.6), dz=Math.abs(z+.45)-th;
+      let d=Math.min(Math.max(d2,dz),0)+Math.hypot(Math.max(d2,0),Math.max(dz,0))-.012;
+      d=sminK(d,sdChain(x,y,z,[[-.42,-.32,-.43,.06],[-.95,-1.3,-.45,.045],[-1.42,-2.18,-.45,.035]]),.06);
+      d=sminK(d,sdChain(x,y,z,[[-1.8,.3,-.4,.025],[-1.0,.36,-.33,.05],[-.3,.42,-.22,.07]]),.06);
+      d=sminK(d,sdEll(x,y,z,.02,.48,-.08,.2,.07,.16),.07);
+      d=sminK(d,sdChain(x,y,z,[[-.32,.3,-.28,.07],[-.3,.36,-.02,.055],[-.16,.3,.17,.04]]),.05);
+      d=sminK(d,sdEll(x,y,z,-.37,-.02,-.08,.08,.25,.18),.08);
+      d=smaxK(d,-sdSphere(x,y,z,-.03,-.1,0,.32),.03);
+      return Math.min(d,sdChain(x,y,z,[[0,.53,.05,.07],[-.5,.6,.24,.058],[-1.2,.56,.3,.052],[-1.8,.52,.16,.066],[-2.15,.5,.1,.085]],.08)); },
+    humerus:()=>(x,y,z)=>{
+      let d=sdEll(x,y,z,-.03,-.1,0,.29,.3,.29);                                                       // head
+      d=sminK(d,sdChain(x,y,z,[[.03,-.22,0,.2],[.1,-.55,0,.15],[.11,-1.5,0,.125],[.1,-2.5,-.01,.13],[.1,-2.95,-.03,.16]]),.12);
+      d=sminK(d,sdEll(x,y,z,.26,-.2,.03,.13,.19,.15),.07);                                            // greater tubercle
+      d=sminK(d,sdEll(x,y,z,.13,-.3,.17,.08,.1,.07),.05);                                             // lesser tubercle
+      d=smaxK(d,-sdChain(x,y,z,[[.2,-.14,.21,.035],[.15,-.85,.15,.03]]),.03);                         // bicipital groove
+      d=sminK(d,sdEll(x,y,z,.22,-1.35,.02,.06,.3,.07),.08);                                           // deltoid tuberosity
+      d=sminK(d,sdEll(x,y,z,.09,-3.22,-.03,.33,.26,.1),.1);                                           // supracondylar flare
+      d=sminK(d,sdEll(x,y,z,-.25,-3.4,-.03,.11,.1,.09),.06);                                          // medial epicondyle
+      d=sminK(d,sdEll(x,y,z,.41,-3.38,-.03,.07,.09,.08),.05);                                         // lateral epicondyle
+      d=sminK(d,sdSpool(x,y,z,-.02,TROCH_Y,.03,.17,.115,.165),.05);                                   // trochlea
+      d=sminK(d,sdSphere(x,y,z,.25,TROCH_Y+.01,.07,.125),.05);                                        // capitulum
+      d=smaxK(d,-sdEll(x,y,z,.02,-3.28,-.13,.13,.15,.06),.03);                                        // olecranon fossa
+      return smaxK(d,-sdEll(x,y,z,0,-3.3,.11,.1,.08,.04),.03); },                                     // coronoid fossa
+    ulna:()=>(x,y,z)=>{
+      let d=sdChain(x,y,z,[[-.1,.36,-.15,.1],[-.12,.1,-.13,.13],[-.14,-.22,-.04,.115],[-.16,-.7,-.02,.08],[-.17,-1.6,-.01,.065],[-.18,-2.6,0,.06],[-.17,-2.9,0,.085]],.08);
+      d=sminK(d,sdEll(x,y,z,-.08,-.1,.13,.1,.07,.11),.06);                                            // coronoid process
+      d=sminK(d,sdChain(x,y,z,[[-.15,-.9,.05,.02],[-.1,-2.2,.04,.015]]),.05);                         // interosseous crest
+      d=smaxK(d,-sdSpool(x,y,z,-.08,.1,.03,.2,.13,.18),.025);                                         // trochlear notch
+      d=smaxK(d,-sdSphere(x,y,z,.19,-.13,.02,.15),.02);                                               // radial notch
+      return sminK(d,sdChain(x,y,z,[[-.2,-2.92,-.04,.045],[-.22,-3.08,-.04,.025]]),.03); },          // styloid
+    radiusShaft:()=>(x,y,z)=>Math.max(RAD(x,y,z),y-cutAt(x,z)),
+    headA:()=>(x,y,z)=>Math.max(RAD_UP(x,y,z),-splitAt(x,y,z),-(y+.22)),
+    headB:()=>(x,y,z)=>Math.max(RAD_UP(x,y,z),Math.min(splitAt(x,y,z),y+.22)),
+    carpals:()=>(x,y,z)=>{ let d=1e9; for(const c of CARPALS) d=sminK(d,sdEll(x,y,z,...c),.012); return d; },
+    hand:(L,s,distal)=>(x,y,z)=>{                                // metacarpal / phalanx: base, waisted shaft, head or tuft
+      let d=sdEll(x,y,z,0,-.03,0,.062*s,.045,.055*s);
+      d=sminK(d,sdChain(x,y,z,[[0,-.05,0,.036*s],[0,-L*.5,.008,.028*s],[0,-L+.06,.012,.03*s]]),.04);
+      return sminK(d, distal ? sdEll(x,y,z,0,-L+.035,.01,.042*s,.032,.022*s) : sdEll(x,y,z,0,-L+.035,.012,.052*s,.038,.046*s), .03); }
+  };
+
+  // sample -(sdf) on an n^3 lattice fitted to the box; exact only near the surface (narrow band)
+  function buildField(sdf,bmin,bmax,n){
+    const f=new Float32Array(n*n*n), h=n/2, n2=n*n;
+    const cx=(bmin[0]+bmax[0])/2, cy=(bmin[1]+bmax[1])/2, cz=(bmin[2]+bmax[2])/2;
+    const hx=(bmax[0]-bmin[0])/2, hy=(bmax[1]-bmin[1])/2, hz=(bmax[2]-bmin[2])/2;
+    const val=(i,j,k)=>{ const px=cx+((i-h)/h)*hx, py=cy+((j-h)/h)*hy, pz=cz+((k-h)/h)*hz; return -(sdf(px,py,pz)+grain(px,py,pz)); };
+    const S=4, m=Math.ceil((n-1)/S), cs=m+1, C=new Float32Array(cs*cs*cs), ci=c=>Math.min(c*S,n-1);
+    for(let k=0;k<cs;k++) for(let j=0;j<cs;j++) for(let i=0;i<cs;i++) C[i+j*cs+k*cs*cs]=val(ci(i),ci(j),ci(k));
+    const band=1.5*S*2*Math.max(hx,hy,hz)/n;
+    for(let k=0;k<m;k++) for(let j=0;j<m;j++) for(let i=0;i<m;i++){
+      const q=i+j*cs+k*cs*cs, c000=C[q], c100=C[q+1], c010=C[q+cs], c110=C[q+1+cs],
+            c001=C[q+cs*cs], c101=C[q+1+cs*cs], c011=C[q+cs+cs*cs], c111=C[q+1+cs+cs*cs];
+      const near=Math.min(Math.abs(c000),Math.abs(c100),Math.abs(c010),Math.abs(c110),Math.abs(c001),Math.abs(c101),Math.abs(c011),Math.abs(c111))<band;
+      const i0=ci(i), j0=ci(j), k0=ci(k), i1=ci(i+1), j1=ci(j+1), k1=ci(k+1);
+      for(let kk=k0;kk<=k1;kk++){ const tz=(kk-k0)/((k1-k0)||1);
+        for(let jj=j0;jj<=j1;jj++){ const ty=(jj-j0)/((j1-j0)||1), o=kk*n2+jj*n;
+          for(let ii=i0;ii<=i1;ii++){
+            if(near){ f[o+ii]=val(ii,jj,kk); continue; }
+            const tx=(ii-i0)/((i1-i0)||1);
+            const a0=c000+(c100-c000)*tx, a1=c010+(c110-c010)*tx, a2=c001+(c101-c001)*tx, a3=c011+(c111-c011)*tx;
+            const b0=a0+(a1-a0)*ty, b1=a2+(a3-a2)*ty; f[o+ii]=b0+(b1-b0)*tz; } } }
+    }
+    return f;
+  }
+  if (typeof WorkerGlobalScope !== 'undefined') {
+    onmessage = e => { const {id,name,args,bmin,bmax,res} = e.data; const f = buildField(BONES[name](...args),bmin,bmax,res); postMessage({id,f},[f.buffer]); };
+  }
+  `;
+
+  // ---- field providers: Web Workers in parallel, main-thread fallback ----
+  let fieldFor, stopWorkers = ()=>{};
+  try {
+    const url = URL.createObjectURL(new Blob([SDF_LIB], { type:'text/javascript' }));
+    const nW = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
+    const workers = Array.from({ length:nW }, ()=> new Worker(url));
+    const pending = new Map(); let rid = 0;
+    workers.forEach(w=> w.onmessage = e=>{ const r = pending.get(e.data.id); pending.delete(e.data.id); r(e.data.f); });
+    fieldFor = (name,args,bmin,bmax,res)=> new Promise(ok=>{ const id = ++rid; pending.set(id, ok); workers[id % nW].postMessage({ id,name,args,bmin,bmax,res }); });
+    stopWorkers = ()=>{ workers.forEach(w=>w.terminate()); URL.revokeObjectURL(url); };
+  } catch (e) {
+    const lib = new Function(SDF_LIB + '; return { BONES, buildField };')();
+    fieldFor = (name,args,bmin,bmax,res)=> new Promise(ok=> setTimeout(()=> ok(lib.buildField(lib.BONES[name](...args),bmin,bmax,res)), 0));
+  }
+
+  const mcPool = {};
+  function meshFromField(field, bmin, bmax, res, mat=boneMat){
+    const mc = mcPool[res] || (mcPool[res] = new MarchingCubes(res, mat, false, false, 160000));
+    mc.reset(); mc.field.set(field); mc.isolation = 0; mc.update();
+    const cx=(bmin[0]+bmax[0])/2, cy=(bmin[1]+bmax[1])/2, cz=(bmin[2]+bmax[2])/2;
+    const hx=(bmax[0]-bmin[0])/2, hy=(bmax[1]-bmin[1])/2, hz=(bmax[2]-bmin[2])/2;
+    const cnt=mc.count, P=mc.positionArray, Nn=mc.normalArray;
+    const pos=new Float32Array(cnt*3), nor=new Float32Array(cnt*3);
+    for(let v=0; v<cnt*3; v+=3){
+      pos[v]=cx+P[v]*hx; pos[v+1]=cy+P[v+1]*hy; pos[v+2]=cz+P[v+2]*hz;
+      const nx=Nn[v]/hx, ny=Nn[v+1]/hy, nz=Nn[v+2]/hz, l=Math.hypot(nx,ny,nz)||1;   // gradient → world normal on a stretched grid
+      nor[v]=nx/l; nor[v+1]=ny/l; nor[v+2]=nz/l;
+    }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    g.setAttribute('normal', new THREE.BufferAttribute(nor,3));
+    g.computeBoundingSphere();
+    return new THREE.Mesh(g, mat);
+  }
+  const builds = [];
+  function bone3d(parent, name, args, bmin, bmax, res, place){
+    builds.push(fieldFor(name, args, bmin, bmax, res).then(f=>{
+      const m = meshFromField(f, bmin, bmax, res); if (place) place(m); parent.add(m);
+    }));
+  }
+
   /* =========================================================
      ARM (left, front view: lateral = +x, palm facing +z)
      ========================================================= */
-  const root = new THREE.Group(); scene.add(root);
 
-  // --- shoulder girdle (fixed) ---
+  // --- shoulder girdle: scapula, spine, acromion, coracoid, glenoid, clavicle ---
   const girdle = new THREE.Group(); girdle.position.y = 4.3; root.add(girdle);
   const scapShape = new THREE.Shape();
   scapShape.moveTo(-.32,.22); scapShape.quadraticCurveTo(-1.0,.5,-1.85,.42);
   scapShape.quadraticCurveTo(-1.75,-1.0,-1.45,-2.25); scapShape.quadraticCurveTo(-.9,-1.0,-.36,-.28);
   scapShape.quadraticCurveTo(-.28,0,-.32,.22);
-  const scap = mesh(new THREE.ExtrudeGeometry(scapShape,{depth:.05,bevelEnabled:true,bevelThickness:.03,bevelSize:.04,bevelSegments:2,curveSegments:24}));
-  scap.position.z = -.45; girdle.add(scap);
-  const spine = mesh(bone(1.9,.05,.09,.07,{flatZ:.7,seg:20})); spine.rotation.z = Math.PI/2 - .08; spine.position.set(-.82,.38,-.3); girdle.add(spine);
-  girdle.add(sphere(.13, .08,.45,-.1, 1.4,.6,1.2)); // acromion
-  const corac = mesh(bone(.6,.045,.07,.06,{flatZ:1,seg:16,bend:.06})); corac.rotation.set(Math.PI/2-.35,0,.3); corac.position.set(-.38,.3,.12); girdle.add(corac);
-  const clav = mesh(bone(2.3,.06,.1,.11,{flatZ:.9,bend:.12,seg:20})); clav.rotation.z = Math.PI/2 + .12; clav.rotation.y = .25; clav.position.set(-1.05,.55,.3); girdle.add(clav);
-  girdle.add(sphere(.24, -.36,0,-.05, .5,1,1)); // glenoid rim
+  const scapPoly = scapShape.getPoints(10).map(v=>[v.x,v.y]).filter((p,i,a)=>{ const q=a[(i+a.length-1)%a.length]; return Math.hypot(p[0]-q[0],p[1]-q[1])>1e-4; });
+  bone3d(girdle, 'girdle', [scapPoly], [-2.32,-2.42,-.62], [.32,.78,.48], 112);
 
-  // --- shoulder / humerus ---
+  // --- humerus ---
   const shoulder = new THREE.Group(); girdle.add(shoulder);
   const HUM = 3.4;
-  const humerus = mesh(bone(HUM, .125, .27, .3, { bend:-.04, wB:.16, sxB:1.75, szB:.55, sxT:1.05 }));
-  humerus.position.set(.1, -.18 - HUM/2, 0); shoulder.add(humerus);
-  shoulder.add(marrow(HUM*.6, .055, .1, -.18 - HUM/2));
-  shoulder.add(sphere(.065, .23,-1.35,.02, .8,4.2,.9));        // deltoid tuberosity
-  shoulder.add(sphere(.31, -.04,-.12,0));                 // humeral head
-  shoulder.add(sphere(.18, .32,-.14,.04, 1,1.3,1));       // greater tubercle
-  shoulder.add(sphere(.11, .18,-.3,.2, 1,1.4,1));         // lesser tubercle
   const distY = -.18 - HUM + .1;
-  shoulder.add(sphere(.13, -.24,distY+.06,-.02, 1.3,1,1)); // medial epicondyle
-  shoulder.add(sphere(.1, .44,distY+.08,-.02));           // lateral epicondyle
-  const spool=[]; for(let i=0;i<=24;i++){ const y=-.2+.4*i/24; const r=(.11+.065*Math.pow(Math.abs(y)/.2,2))*Math.pow(Math.sin(Math.PI*i/24),.25); spool.push(new THREE.Vector2(Math.max(r,.0001),y)); }
-  const troch = mesh(new THREE.LatheGeometry(spool,40)); troch.rotation.z = Math.PI/2; troch.position.set(-.02,distY-.06,.05); shoulder.add(troch);
-  shoulder.add(sphere(.14, .27,distY-.05,.1));            // capitulum
+  bone3d(shoulder, 'humerus', [], [-.44,-3.82,-.38], [.62,.3,.38], 104);
 
   // upper arm skin
   const uaPts=[]; for(let i=0;i<=44;i++){ const t=i/44; const y=lerp(-HUM-.4,.55,t);
@@ -745,44 +967,24 @@ function init(){
   const elbow = new THREE.Group(); elbow.position.set(.06, distY-.16, 0); shoulder.add(elbow);
   const forearm = new THREE.Group(); elbow.add(forearm);         // pronation / supination axis
   const WRIST_Y = -3.0;
-  const UL = 2.95, RA = 2.75;
-  const ulC = WRIST_Y + UL/2, raC = WRIST_Y + RA/2;
-  const ulX = -.17, raX = .2;
-  const CUT = -.5;                                   // radial neck, just below the head
-  const raTc = (CUT - (raC-RA/2))/RA, raCut = CUT-raC;
+  const raX = .19;
+  const CUT = -.3;                                                // radial neck (keep in sync with SDF_LIB)
 
-  // ulna (intact)
-  const ulna = mesh(bone(UL,.08,.17,.1,{wT:.1, szT:1.3, bend:-.03})); ulna.position.set(ulX,ulC,0); forearm.add(ulna);
-  const notchG = new THREE.Group(); notchG.position.set(ulX+.05,.1,0); notchG.rotation.y = Math.PI/2; forearm.add(notchG);
-  const notch = mesh(new THREE.TorusGeometry(.18,.068,14,48,Math.PI+1.6)); notch.rotation.z = -Math.PI/2-.4; notchG.add(notch);  // trochlear notch
-  forearm.add(sphere(.1, ulX+.02,.22,-.2, 1,1.25,1));        // olecranon tip
-  forearm.add(marrow(UL*.6, .04, ulX, ulC));
-  forearm.add(sphere(.07, ulX-.03,WRIST_Y+.02,-.02));        // ulnar styloid
-
-  // radius shaft (intact, distal to the neck)
-  const raShaft = mesh(bone(RA,.075,.12,.24,{sxB:1.45,szB:.7,bend:.05,t0:0,t1:raTc,cut:raCut,ph:1.7,closeTop:true,flatZ:.75}));
-  raShaft.position.set(raX,raC,0); forearm.add(raShaft);
-  forearm.add(marrow(RA*.55, .04, raX, raC-.2));
-  forearm.add(sphere(.08, raX+.2,WRIST_Y+.06,0, .9,1.3,.9)); // radial styloid
-  forearm.add(sphere(.06, raX-.06,-.78,.03, 1,2.3,1));      // radial tuberosity
-  const marker = new THREE.Object3D(); marker.position.set(raX, CUT+.12, 0); forearm.add(marker);
+  bone3d(forearm, 'ulna', [], [-.44,-3.18,-.34], [.22,.52,.32], 104);
+  bone3d(forearm, 'radiusShaft', [], [-.05,-3.22,-.24], [.56,-.18,.24], 104);
+  const marker = new THREE.Object3D(); marker.position.set(raX, CUT, .02); forearm.add(marker);
 
   // callus (appears on consolidation)
   const callusMat = makeXray(0x8fe9ff, .12, 1.2, 1.8, 14);
   const callus = new THREE.Group(); forearm.add(callus);
-  const cr = sphere(.15, raX,CUT+.05,0, 1,1.3,1, callusMat); callus.add(cr);
+  const cr = sphere(.11, raX,CUT,.02, 1,1.3,1, callusMat); callus.add(cr);
 
-  // radial head fracture: neck + two head fragments (Mason II-like split)
+  // radial head fracture (Mason II): split-off wedge A + head/neck fragment B
   const frag = new THREE.Group(); frag.position.set(raX, CUT, 0); forearm.add(frag);
   const headA = new THREE.Group(), headB = new THREE.Group(); frag.add(headA, headB);
-  const neck = mesh(bone(RA,.075,.12,.24,{sxB:1.45,szB:.7,bend:.05,t0:raTc,t1:1,cut:raCut,ph:1.7,closeBottom:true,flatZ:.75}));
-  neck.position.set(0, raC-CUT, 0); headB.add(neck);
-  const HY = -.18 - CUT;
-  const wedge = (a0,len)=>mesh(new THREE.CylinderGeometry(.155,.14,.14,32,1,false,a0,len));
-  const hA = wedge(0, 2.2); hA.position.y = HY; headA.add(hA);
-  const hB = wedge(2.2, Math.PI*2-2.2); hB.position.y = HY; headB.add(hB);
-  const fovA = mesh(new THREE.TorusGeometry(.1,.012,8,32,2.2)); fovA.rotation.x = -Math.PI/2; fovA.position.y = HY+.07; headA.add(fovA);
-  const fovB = mesh(new THREE.TorusGeometry(.1,.012,8,32,Math.PI*2-2.2)); fovB.rotation.set(-Math.PI/2,0,2.2); fovB.position.y = HY+.07; headB.add(fovB);
+  const toFrag = m => m.position.set(-raX, -CUT, 0);
+  bone3d(headA, 'headA', [], [-.05,-.46,-.22], [.44,.02,.26], 56, toFrag);
+  bone3d(headB, 'headB', [], [-.05,-.46,-.22], [.44,.02,.26], 56, toFrag);
 
   // forearm skin
   const faPts=[]; for(let i=0;i<=44;i++){ const t=i/44; const y=lerp(WRIST_Y-.15,.45,t);
@@ -793,22 +995,19 @@ function init(){
 
   // --- wrist + hand ---
   const wrist = new THREE.Group(); wrist.position.y = WRIST_Y - .08; forearm.add(wrist);
-  [[-.17,-.1,1.15,.8,.8],[-.05,-.12,1,.95,.8],[.07,-.11,1.35,.8,.9],[.2,-.09,.9,1.05,.8],[-.2,-.29,.9,1.15,.8],[-.07,-.3,1,1.25,.8],[.06,-.3,1.2,1,.85],[.2,-.26,.85,1.25,.8]].forEach(([x,y,sx,sy,sz],i)=>
-    wrist.add(sphere(.078, x,y,(i%2?.02:-.02), sx,sy,sz)));
-  wrist.add(sphere(.045, -.23,-.12,.1));                     // pisiform
+  bone3d(wrist, 'carpals', [], [-.26,-.43,-.13], [.37,.03,.17], 60);   // scaphoid, lunate, triquetrum, pisiform, trapezium, trapezoid, capitate, hamate
   const palmSkin = sphere(1, .02,-.78,0, .45,.62,.17, skinMat); wrist.add(palmSkin);
+  const handBone = (parent, L, s, distal=false)=> bone3d(parent, 'hand', [L,s,distal], [-.11,-L-.06,-.1], [.11,.06,.11], 40);
 
   const fingers = [];
   const FX = [.21,.07,-.07,-.21], ML = [.72,.75,.68,.6], PL = [[.42,.27,.2],[.47,.3,.21],[.44,.29,.2],[.34,.21,.18]];
   FX.forEach((x,i)=>{
-    const spread = -x*.12;
-    const mc = mesh(bone(ML[i],.032,.055,.062,{flatZ:1,seg:16}));
-    const base = new THREE.Group(); base.position.set(x,-.36,0); base.rotation.z = spread; wrist.add(base);
-    mc.position.y = -ML[i]/2; base.add(mc);
+    const base = new THREE.Group(); base.position.set(x,-.36,0); base.rotation.z = -x*.12; wrist.add(base);
+    handBone(base, ML[i], 1);
     let parent = base, y = -ML[i]; const segs=[];
     PL[i].forEach((L,k)=>{
       const g = new THREE.Group(); g.position.y = y; parent.add(g);
-      const b = mesh(bone(L,.025-k*.003,.042-k*.004,.045-k*.005,{flatZ:1,seg:14})); b.position.y = -L/2-.02; g.add(b);
+      handBone(g, L, .85 - k*.1, k===2);
       const s = mesh(new THREE.CapsuleGeometry(.075-k*.008, L-.05, 4, 14), skinMat); s.position.y = -L/2; g.add(s);
       segs.push(g); parent = g; y = -L-.03;
     });
@@ -816,10 +1015,10 @@ function init(){
   });
   // thumb
   const thumb = new THREE.Group(); thumb.position.set(.24,-.3,.06); thumb.rotation.set(-.35,.5,.62); wrist.add(thumb);
-  const mc1 = mesh(bone(.5,.035,.06,.065,{flatZ:1,seg:16})); mc1.position.y=-.25; thumb.add(mc1);
+  handBone(thumb, .5, 1.05);
   const thumbSegs=[]; { let parent=thumb, y=-.5;
     [.34,.25].forEach((L,k)=>{ const g=new THREE.Group(); g.position.y=y; parent.add(g);
-      const b=mesh(bone(L,.03,.048,.05,{flatZ:1,seg:14})); b.position.y=-L/2-.02; g.add(b);
+      handBone(g, L, 1 - k*.1, k===1);
       const s=mesh(new THREE.CapsuleGeometry(.085-k*.01, L-.05, 4, 14), skinMat); s.position.y=-L/2; g.add(s);
       thumbSegs.push(g); parent=g; y=-L-.03; }); }
 
@@ -829,6 +1028,8 @@ function init(){
     thumb.rotation.x = -.35 - c*.5; thumb.rotation.z = .62 - c*.35;
     thumbSegs[0].rotation.x = -c*.7; thumbSegs[1].rotation.x = -c*1.0;
   }
+
+  Promise.all(builds).then(()=>{ stopWorkers(); Object.values(mcPool).forEach(mc=>mc.geometry.dispose()); });
 
   /* ---------- fracture FX ---------- */
   const glowMat = makeGlow(0xff4a3d);
