@@ -1,6 +1,6 @@
-# LandFisio — Landing page para fisioterapia
+# LandFisio — Landing page para fisioterapeuta
 
-Landing page premium para a **Drª Vanessa Oliveira · Fisioterapia**, com uma narrativa em 3D controlada pelo scroll: um braço em raio-x com **fratura da cabeça do rádio** que se reconstitui, consolida e volta a se movimentar.
+Landing page premium para a **Drª Vanessa Oliveira · Fisioterapeuta**, com uma narrativa em 3D controlada pelo scroll: um braço em raio-x com **fratura da cabeça do rádio** que se reconstitui, consolida e volta a se movimentar.
 
 Tudo em **um único arquivo `index.html`**, sem build, sem framework e sem dependências instaladas — as bibliotecas vêm de CDN.
 
