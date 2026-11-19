@@ -42,7 +42,13 @@ Qualquer servidor estático funciona (`python -m http.server`, Live Server do VS
 
 ```
 .
-├── index.html   # página completa: HTML + CSS + JS (UI e cena 3D)
+├── index.html          # página completa: HTML + CSS + JS (UI e cena 3D)
+├── assets/
+│   └── bones.bin       # malhas dos ossos pré-calculadas (≈345 KB, meshoptimizer)
+├── tools/
+│   ├── bones-sdf.mjs   # SDFs que esculpem cada osso (fonte do modelo)
+│   ├── bake-bones.mjs  # gera assets/bones.bin
+│   └── package.json
 └── README.md
 ```
 
@@ -64,9 +70,9 @@ Dentro do `index.html`:
 |---|---|
 | **Three.js 0.160.0** (jsDelivr, via import map) | Renderização WebGL, geometrias procedurais |
 | `EffectComposer` + `UnrealBloomPass` + `OutputPass` | Brilho (bloom) do raio-x |
-| `MarchingCubes` (addon) + Web Workers | Malhas dos ossos geradas a partir de campos de distância |
+| `MeshoptDecoder` (addon) | Decodifica as malhas pré-calculadas dos ossos (`assets/bones.bin`) |
 | GLSL customizado (`ShaderMaterial`) | Material de raio-x, brilhos e linha do scanner |
-| CSS puro | Layout, animações de entrada, grão de filme, marquee |
+| CSS puro | Layout, animações de entrada, grão de filme |
 | `IntersectionObserver` | Reveals das seções e pausa da renderização fora da tela |
 | Google Fonts | *Instrument Serif* (títulos), *Manrope* (texto), *JetBrains Mono* (HUD) |
 
@@ -98,13 +104,22 @@ O HUD (consolidação %, amplitude do cotovelo em graus e status clínico) é de
 
 ### Anatomia procedural
 
-Nenhum modelo 3D é baixado — os ossos são **esculpidos em código** e convertidos em malha no carregamento:
+Os ossos são **esculpidos em código** (`tools/bones-sdf.mjs`) e convertidos em malha **antes do deploy** pelo `tools/bake-bones.mjs`. A página só baixa `assets/bones.bin` e decodifica (≈4 ms):
 
 1. **Campos de distância (SDF)**: cada osso é uma função `d(x, y, z)` montada a partir de primitivas anatômicas — cápsulas cônicas encadeadas (diáfises), elipsoides (cabeças, tubérculos, epicôndilos, ossos do carpo), um "carretel" (tróclea) e um polígono extrudado (lâmina da escápula). As peças são unidas com **união suave** (`smin`) e cavadas com **subtração suave** (fossas, sulco bicipital, incisura troclear, fóvea da cabeça do rádio). Uma leve irregularidade senoidal (`grain`) evita a aparência de CG perfeito.
-2. **Amostragem em Web Workers**: o código das SDFs (`SDF_LIB`) roda em até 4 workers em paralelo. Cada campo é amostrado numa grade ajustada à caixa do osso, com **banda estreita**: uma grade grossa (passo 4) decide quais células estão perto da superfície; só elas são avaliadas exatamente, o resto é interpolado. Sem suporte a workers, o mesmo código roda na thread principal.
-3. **Malha**: o campo volta como `Float32Array` transferível e o `MarchingCubes` do Three.js (`three/addons/objects/MarchingCubes.js`) gera os triângulos. As posições são reescaladas para a caixa do osso e as normais (gradiente do campo) são corrigidas para a grade esticada.
+2. **Amostragem**: cada campo é amostrado numa grade ajustada à caixa do osso, com **banda estreita**: uma grade grossa (passo 4) decide quais células estão perto da superfície; só elas são avaliadas exatamente, o resto é interpolado.
+3. **Malha**: o `MarchingCubes` do Three.js gera os triângulos; as normais (gradiente do campo) são corrigidas para a grade esticada.
+4. **Otimização**: vértices repetidos são soldados, a malha é simplificada com o `meshoptimizer` (346 mil → 73 mil triângulos, sem diferença visível no shader de raio-x), quantizada (posição 14 bits, normal 8 bits) e comprimida. Ossos iguais (falanges repetidas) são gravados uma vez só.
 
-O esqueleto completo fica pronto em cerca de 2 s sem travar a página (pior pausa da thread principal ≈ 125 ms, medido em desktop).
+Antes, esse processo rodava no navegador e custava ~5,5 s de CPU no carregamento (bem mais em celulares). Agora o esqueleto aparece assim que o `bones.bin` chega.
+
+**Mudou a anatomia?** Edite `tools/bones-sdf.mjs` (e as caixas/resoluções em `tools/bake-bones.mjs`, se preciso) e gere de novo:
+
+```bash
+cd tools && npm install && npm run bake      # opcional: node bake-bones.mjs 0.3  → mais triângulos
+```
+
+As chaves dos ossos (`'humerus'`, `` `hand:${L},${s},${distal}` `` etc.) precisam bater entre o bake e as chamadas `bone3d()` no `index.html`.
 
 - **Membro superior esquerdo** (vista anterior, lateral = +x):
   - Escápula com borda lateral, espinha, acrômio, **processo coracoide**, colo e **cavidade glenoide** escavada pela cabeça do úmero; clavícula em "S";
@@ -153,21 +168,19 @@ Inspirados em padrões populares do 21st.dev, mas implementados em HTML/CSS/JS p
 | Botões magnéticos + reflexo | Botões do hero e do contato | `translate` proporcional ao ponteiro; faixa de luz no hover |
 | Aurora | Fundo da seção de contato | Dois gradientes radiais flutuando |
 | Pulso nas etapas | Linha do tempo do método | `box-shadow` animado em sequência |
-| Bordas esmaecidas | Faixa de especialidades | `mask-image` linear |
 
 Os efeitos de ponteiro só ligam com mouse (`hover: hover` e `pointer: fine`); em telas de toque os estados de hover não "grudam". Todos respeitam `prefers-reduced-motion`.
 
 ## Seções da página
 
 1. **Hero / história em 3D** — com HUD estilo exame de imagem e legendas que aparecem por faixa de scroll (`data-in` / `data-out`).
-2. **Marquee** de especialidades.
-3. **Sobre** — foto (placeholder), bio, contadores animados e assinatura.
-4. **Especialidades** — 6 cards com ícones SVG e hover invertido.
-5. **Método** — linha do tempo em 4 etapas com preenchimento animado.
-6. **Depoimentos** — 3 cards.
-7. **FAQ** — `<details>` nativos estilizados.
-8. **Contato** — CTA, WhatsApp, endereço, horários e rodapé.
-9. **Botão flutuante de WhatsApp** — aparece só depois da animação 3D.
+2. **Sobre** — foto (placeholder), bio, contadores animados e assinatura.
+3. **Especialidades** — 6 cards com ícones SVG e hover invertido.
+4. **Método** — linha do tempo em 4 etapas com preenchimento animado.
+5. **Depoimentos** — 3 cards.
+6. **FAQ** — `<details>` nativos estilizados.
+7. **Contato** — CTA, WhatsApp, endereço, horários e rodapé.
+8. **Botão flutuante de WhatsApp** — aparece só depois da animação 3D.
 
 ## Responsividade
 
@@ -188,7 +201,8 @@ Outros detalhes: `100svh` na seção fixa (barra de endereço do mobile), `Resiz
 ## Acessibilidade e performance
 
 - `prefers-reduced-motion`: sem suavização, sem partículas, sem tremor, sem grão animado e sem animações de entrada.
-- Renderização pausada quando a seção 3D sai da tela (`IntersectionObserver`).
+- Loop 3D inteiro (cálculos + renderização) pausado quando a seção sai da tela (`IntersectionObserver`).
+- Malhas dos ossos pré-calculadas e comprimidas (`assets/bones.bin`, pré-carregado com `<link rel="preload">`), sem processamento pesado no carregamento.
 - Fallback sem WebGL: a classe `no-webgl` esconde o canvas e mostra um fundo estático.
 - Menu com `aria-expanded`/`aria-controls`, links com foco nativo, canvas com `aria-hidden`.
 - Proteção contra `NaN` no progresso quando a viewport ainda não tem altura (abas em segundo plano).

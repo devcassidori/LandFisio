@@ -183,13 +183,6 @@ img{max-width:100%;display:block}
   .hud .c3,.hud .c4{bottom:10px}
 }
 
-/* ---------- MARQUEE ---------- */
-.marquee{border-top:1px solid var(--line-dark);border-bottom:1px solid var(--line-dark);overflow:hidden;padding:26px 0;background:var(--ink)}
-.marquee .track{display:flex;gap:56px;width:max-content;animation:slide 38s linear infinite;font-family:var(--serif);font-size:clamp(28px,3vw,44px);color:rgba(233,241,247,.85)}
-.marquee .track span{display:flex;align-items:center;gap:56px;white-space:nowrap}
-.marquee .track span::after{content:"✦";font-size:.5em;color:var(--ice)}
-@keyframes slide{to{transform:translateX(-50%)}}
-
 /* ---------- LIGHT SECTIONS ---------- */
 .light-wrap{background:var(--paper);color:var(--navy)}
 section.block{padding:clamp(88px,12vw,160px) clamp(16px,6vw,96px)}
@@ -315,9 +308,6 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
   animation:beam 6s linear infinite}
 @keyframes beam{to{--beam:360deg}}
-/* marquee edges fade */
-.marquee{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.marquee .track span:hover{color:var(--ice)}
 /* drifting aurora behind the final CTA */
 .cta::before{animation:drift 18s ease-in-out infinite alternate}
 .cta::after{content:"";position:absolute;width:700px;height:700px;left:-260px;bottom:-320px;border-radius:50%;pointer-events:none;
@@ -353,7 +343,6 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
 
 @media (prefers-reduced-motion:reduce){
   .reveal,.split .w>span{transition:none;opacity:1;transform:none}
-  .marquee .track{animation:none}
 }
 </style>
 </head>
@@ -446,13 +435,6 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
     <div class="scroll-hint" id="hint">Role<span></span></div>
   </div>
 </section>
-
-<div class="marquee" aria-hidden="true">
-  <div class="track">
-    <span>Ortopedia</span><span>Pós-operatório</span><span>Coluna &amp; postura</span><span>Terapia manual</span><span>Ortopedia</span><span>Pós-operatório</span><span>Coluna &amp; postura</span><span>Terapia manual</span>
-    <span>Ortopedia</span><span>Pós-operatório</span><span>Coluna &amp; postura</span><span>Terapia manual</span><span>Ortopedia</span><span>Pós-operatório</span><span>Coluna &amp; postura</span><span>Terapia manual</span>
-  </div>
-</div>
 
 <main class="light-wrap" id="light">
 
@@ -558,6 +540,7 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
   <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.6 11.6 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.4-.3z"/></svg>
 </a>
 
+<link rel="preload" href="assets/bones.bin" as="fetch" crossorigin>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -647,7 +630,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 const canvas = document.getElementById('scene');
 const story = document.querySelector('.story');
@@ -769,168 +752,42 @@ function init(){
 
   const root = new THREE.Group(); scene.add(root);
 
-  /* ---------- SDF sculpting → MarchingCubes meshes ----------
-     Each bone is a signed-distance field built from anatomical primitives
-     (tapered capsules, ellipsoids, spools) joined with smooth unions and
-     carved with smooth subtractions. The fields are sampled in Web Workers
-     (narrow band, in parallel) and polygonised on the main thread with
-     THREE's MarchingCubes, so the page never freezes while bones are built. */
-  const SDF_LIB = `
-  const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
-  const sminK=(a,b,k)=>{ const h=Math.max(k-Math.abs(a-b),0)/k; return Math.min(a,b)-h*h*k*.25; };
-  const smaxK=(a,b,k)=>-sminK(-a,-b,k);
-  const sdSphere=(x,y,z,cx,cy,cz,r)=>Math.hypot(x-cx,y-cy,z-cz)-r;
-  function sdEll(x,y,z,cx,cy,cz,rx,ry,rz){ x-=cx; y-=cy; z-=cz;
-    const k0=Math.hypot(x/rx,y/ry,z/rz), k1=Math.hypot(x/(rx*rx),y/(ry*ry),z/(rz*rz));
-    return k1>1e-9 ? k0*(k0-1)/k1 : -Math.min(rx,ry,rz); }
-  function sdCone(px,py,pz,a,b,r1,r2){ // tapered capsule (round cone)
-    const bax=b[0]-a[0], bay=b[1]-a[1], baz=b[2]-a[2];
-    const l2=bax*bax+bay*bay+baz*baz, rr=r1-r2, a2=l2-rr*rr, il2=1/l2;
-    const pax=px-a[0], pay=py-a[1], paz=pz-a[2];
-    const y=pax*bax+pay*bay+paz*baz, z=y-l2;
-    const qx=pax*l2-bax*y, qy=pay*l2-bay*y, qz=paz*l2-baz*y;
-    const x2=qx*qx+qy*qy+qz*qz, y2=y*y*l2, z2=z*z*l2, k=Math.sign(rr)*rr*rr*x2;
-    if(Math.sign(z)*a2*z2>k) return Math.sqrt(x2+z2)*il2-r2;
-    if(Math.sign(y)*a2*y2<k) return Math.sqrt(x2+y2)*il2-r1;
-    return (Math.sqrt(x2*a2*il2)+y*rr)*il2-r1; }
-  function sdChain(x,y,z,k,blend=.05){ let d=1e9; for(let i=0;i<k.length-1;i++) d=sminK(d,sdCone(x,y,z,k[i],k[i+1],k[i][3],k[i+1][3]),blend); return d; }
-  function sdSpool(x,y,z,cx,cy,cz,halfW,rMid,rEdge){ const dx=x-cx, t=Math.min(Math.abs(dx)/halfW,1), r=rMid+(rEdge-rMid)*t*t;
-    return smaxK(Math.hypot(y-cy,z-cz)-r, Math.abs(dx)-halfW, .04); }
-  function sdPoly2(x,y,V){ let d=(x-V[0][0])**2+(y-V[0][1])**2, s=1;
-    for(let i=0,j=V.length-1;i<V.length;j=i,i++){ const ex=V[j][0]-V[i][0], ey=V[j][1]-V[i][1], wx=x-V[i][0], wy=y-V[i][1];
-      const t=clamp((wx*ex+wy*ey)/Math.max(ex*ex+ey*ey,1e-9)), bx=wx-ex*t, by=wy-ey*t; d=Math.min(d,bx*bx+by*by);
-      const c1=y>=V[i][1], c2=y<V[j][1], c3=ex*wy>ey*wx; if((c1&&c2&&c3)||(!c1&&!c2&&!c3)) s=-s; }
-    return s*Math.sqrt(d); }
-  const grain=(x,y,z)=>.004*Math.sin(x*41+y*13)*Math.sin(z*37+y*17)+.003*Math.sin(y*63+x*29+z*23);
-
-  const CUT=-.3, TROCH_Y=-3.54;
-  function RAD(x,y,z){
-    let d=sdChain(x,y,z,[[.19,-.2,.02,.075],[.19,-.42,.02,.075],[.22,-1.4,.01,.085],[.22,-2.4,0,.1],[.23,-2.8,0,.14]],.06);
-    const hx=x-.19, hy=y+.13, hz=z-.02, dd=Math.hypot(hx,hz)-.13, dh=Math.abs(hy)-.055;
-    d=sminK(d, Math.min(Math.max(dd,dh),0)+Math.hypot(Math.max(dd,0),Math.max(dh,0))-.025, .05);   // radial head
-    d=smaxK(d,-sdSphere(x,y,z,.19,.11,.06,.15),.02);                                                // fovea
-    d=sminK(d,sdEll(x,y,z,.13,-.62,.03,.055,.12,.06),.05);                                          // radial tuberosity
-    d=sminK(d,sdChain(x,y,z,[[.16,-.9,.05,.02],[.15,-2.2,.04,.015]]),.05);                          // interosseous crest
-    d=sminK(d,sdEll(x,y,z,.22,-2.86,0,.23,.13,.13),.08);                                            // distal end
-    d=sminK(d,sdChain(x,y,z,[[.38,-2.82,0,.06],[.44,-3.04,0,.03]]),.05);                            // styloid
-    d=smaxK(d,-sdEll(x,y,z,.17,-3.13,0,.22,.1,.13),.03);                                            // carpal facet
-    return d; }
-  const cutAt=(x,z)=>CUT+.03*Math.sin((x-.19)*45+1)+.025*Math.cos((z-.02)*38)+.015*Math.sin((x+z)*70);
-  const splitAt=(x,y,z)=>(x-.19)*Math.cos(.7)+(z-.02)*Math.sin(.7)-.02+.012*Math.sin(y*90);
-  const RAD_UP=(x,y,z)=>Math.max(RAD(x,y,z),cutAt(x,z)-y);
-  const CARPALS=[[.2,-.1,.01,.1,.06,.06],[.06,-.09,0,.07,.065,.06],[-.07,-.1,-.01,.065,.06,.055],[-.12,-.11,.07,.045,.045,.04],
-    [.24,-.27,.03,.07,.07,.06],[.12,-.28,0,.055,.06,.05],[.01,-.27,0,.065,.1,.06],[-.12,-.26,0,.07,.09,.06],[-.13,-.27,.08,.03,.04,.04]];
-
-  const BONES={
-    girdle:(poly)=>(x,y,z)=>{                                   // scapula, spine, acromion, coracoid, glenoid, clavicle
-      const d2=sdPoly2(x,y,poly), th=.022+.03*clamp((x+.9)/.6), dz=Math.abs(z+.45)-th;
-      let d=Math.min(Math.max(d2,dz),0)+Math.hypot(Math.max(d2,0),Math.max(dz,0))-.012;
-      d=sminK(d,sdChain(x,y,z,[[-.42,-.32,-.43,.06],[-.95,-1.3,-.45,.045],[-1.42,-2.18,-.45,.035]]),.06);
-      d=sminK(d,sdChain(x,y,z,[[-1.8,.3,-.4,.025],[-1.0,.36,-.33,.05],[-.3,.42,-.22,.07]]),.06);
-      d=sminK(d,sdEll(x,y,z,.02,.48,-.08,.2,.07,.16),.07);
-      d=sminK(d,sdChain(x,y,z,[[-.32,.3,-.28,.07],[-.3,.36,-.02,.055],[-.16,.3,.17,.04]]),.05);
-      d=sminK(d,sdEll(x,y,z,-.37,-.02,-.08,.08,.25,.18),.08);
-      d=smaxK(d,-sdSphere(x,y,z,-.03,-.1,0,.32),.03);
-      return Math.min(d,sdChain(x,y,z,[[0,.53,.05,.07],[-.5,.6,.24,.058],[-1.2,.56,.3,.052],[-1.8,.52,.16,.066],[-2.15,.5,.1,.085]],.08)); },
-    humerus:()=>(x,y,z)=>{
-      let d=sdEll(x,y,z,-.03,-.1,0,.29,.3,.29);                                                       // head
-      d=sminK(d,sdChain(x,y,z,[[.03,-.22,0,.2],[.1,-.55,0,.15],[.11,-1.5,0,.125],[.1,-2.5,-.01,.13],[.1,-2.95,-.03,.16]]),.12);
-      d=sminK(d,sdEll(x,y,z,.26,-.2,.03,.13,.19,.15),.07);                                            // greater tubercle
-      d=sminK(d,sdEll(x,y,z,.13,-.3,.17,.08,.1,.07),.05);                                             // lesser tubercle
-      d=smaxK(d,-sdChain(x,y,z,[[.2,-.14,.21,.035],[.15,-.85,.15,.03]]),.03);                         // bicipital groove
-      d=sminK(d,sdEll(x,y,z,.22,-1.35,.02,.06,.3,.07),.08);                                           // deltoid tuberosity
-      d=sminK(d,sdEll(x,y,z,.09,-3.22,-.03,.33,.26,.1),.1);                                           // supracondylar flare
-      d=sminK(d,sdEll(x,y,z,-.25,-3.4,-.03,.11,.1,.09),.06);                                          // medial epicondyle
-      d=sminK(d,sdEll(x,y,z,.41,-3.38,-.03,.07,.09,.08),.05);                                         // lateral epicondyle
-      d=sminK(d,sdSpool(x,y,z,-.02,TROCH_Y,.03,.17,.115,.165),.05);                                   // trochlea
-      d=sminK(d,sdSphere(x,y,z,.25,TROCH_Y+.01,.07,.125),.05);                                        // capitulum
-      d=smaxK(d,-sdEll(x,y,z,.02,-3.28,-.13,.13,.15,.06),.03);                                        // olecranon fossa
-      return smaxK(d,-sdEll(x,y,z,0,-3.3,.11,.1,.08,.04),.03); },                                     // coronoid fossa
-    ulna:()=>(x,y,z)=>{
-      let d=sdChain(x,y,z,[[-.1,.36,-.15,.1],[-.12,.1,-.13,.13],[-.14,-.22,-.04,.115],[-.16,-.7,-.02,.08],[-.17,-1.6,-.01,.065],[-.18,-2.6,0,.06],[-.17,-2.9,0,.085]],.08);
-      d=sminK(d,sdEll(x,y,z,-.08,-.1,.13,.1,.07,.11),.06);                                            // coronoid process
-      d=sminK(d,sdChain(x,y,z,[[-.15,-.9,.05,.02],[-.1,-2.2,.04,.015]]),.05);                         // interosseous crest
-      d=smaxK(d,-sdSpool(x,y,z,-.08,.1,.03,.2,.13,.18),.025);                                         // trochlear notch
-      d=smaxK(d,-sdSphere(x,y,z,.19,-.13,.02,.15),.02);                                               // radial notch
-      return sminK(d,sdChain(x,y,z,[[-.2,-2.92,-.04,.045],[-.22,-3.08,-.04,.025]]),.03); },          // styloid
-    radiusShaft:()=>(x,y,z)=>Math.max(RAD(x,y,z),y-cutAt(x,z)),
-    headA:()=>(x,y,z)=>Math.max(RAD_UP(x,y,z),-splitAt(x,y,z),-(y+.22)),
-    headB:()=>(x,y,z)=>Math.max(RAD_UP(x,y,z),Math.min(splitAt(x,y,z),y+.22)),
-    carpals:()=>(x,y,z)=>{ let d=1e9; for(const c of CARPALS) d=sminK(d,sdEll(x,y,z,...c),.012); return d; },
-    hand:(L,s,distal)=>(x,y,z)=>{                                // metacarpal / phalanx: base, waisted shaft, head or tuft
-      let d=sdEll(x,y,z,0,-.03,0,.062*s,.045,.055*s);
-      d=sminK(d,sdChain(x,y,z,[[0,-.05,0,.036*s],[0,-L*.5,.008,.028*s],[0,-L+.06,.012,.03*s]]),.04);
-      return sminK(d, distal ? sdEll(x,y,z,0,-L+.035,.01,.042*s,.032,.022*s) : sdEll(x,y,z,0,-L+.035,.012,.052*s,.038,.046*s), .03); }
-  };
-
-  // sample -(sdf) on an n^3 lattice fitted to the box; exact only near the surface (narrow band)
-  function buildField(sdf,bmin,bmax,n){
-    const f=new Float32Array(n*n*n), h=n/2, n2=n*n;
-    const cx=(bmin[0]+bmax[0])/2, cy=(bmin[1]+bmax[1])/2, cz=(bmin[2]+bmax[2])/2;
-    const hx=(bmax[0]-bmin[0])/2, hy=(bmax[1]-bmin[1])/2, hz=(bmax[2]-bmin[2])/2;
-    const val=(i,j,k)=>{ const px=cx+((i-h)/h)*hx, py=cy+((j-h)/h)*hy, pz=cz+((k-h)/h)*hz; return -(sdf(px,py,pz)+grain(px,py,pz)); };
-    const S=4, m=Math.ceil((n-1)/S), cs=m+1, C=new Float32Array(cs*cs*cs), ci=c=>Math.min(c*S,n-1);
-    for(let k=0;k<cs;k++) for(let j=0;j<cs;j++) for(let i=0;i<cs;i++) C[i+j*cs+k*cs*cs]=val(ci(i),ci(j),ci(k));
-    const band=1.5*S*2*Math.max(hx,hy,hz)/n;
-    for(let k=0;k<m;k++) for(let j=0;j<m;j++) for(let i=0;i<m;i++){
-      const q=i+j*cs+k*cs*cs, c000=C[q], c100=C[q+1], c010=C[q+cs], c110=C[q+1+cs],
-            c001=C[q+cs*cs], c101=C[q+1+cs*cs], c011=C[q+cs+cs*cs], c111=C[q+1+cs+cs*cs];
-      const near=Math.min(Math.abs(c000),Math.abs(c100),Math.abs(c010),Math.abs(c110),Math.abs(c001),Math.abs(c101),Math.abs(c011),Math.abs(c111))<band;
-      const i0=ci(i), j0=ci(j), k0=ci(k), i1=ci(i+1), j1=ci(j+1), k1=ci(k+1);
-      for(let kk=k0;kk<=k1;kk++){ const tz=(kk-k0)/((k1-k0)||1);
-        for(let jj=j0;jj<=j1;jj++){ const ty=(jj-j0)/((j1-j0)||1), o=kk*n2+jj*n;
-          for(let ii=i0;ii<=i1;ii++){
-            if(near){ f[o+ii]=val(ii,jj,kk); continue; }
-            const tx=(ii-i0)/((i1-i0)||1);
-            const a0=c000+(c100-c000)*tx, a1=c010+(c110-c010)*tx, a2=c001+(c101-c001)*tx, a3=c011+(c111-c011)*tx;
-            const b0=a0+(a1-a0)*ty, b1=a2+(a3-a2)*ty; f[o+ii]=b0+(b1-b0)*tz; } } }
+  /* ---------- baked bone meshes ----------
+     Os ossos são esculpidos por campos de distância (tools/bones-sdf.mjs) e pré-calculados
+     com tools/bake-bones.mjs em assets/bones.bin (malhas simplificadas, quantizadas e
+     comprimidas com meshoptimizer). Aqui só baixamos e decodificamos — sem cálculo pesado. */
+  const bonesReady = Promise.all([
+    fetch('assets/bones.bin').then(r=>{ if(!r.ok) throw new Error('bones.bin ' + r.status); return r.arrayBuffer(); }),
+    MeshoptDecoder.ready
+  ]).then(([buf])=>{
+    const hl = new DataView(buf).getUint32(0, true);
+    const header = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, hl)));
+    const data = new Uint8Array(buf, 4 + hl), lib = new Map();
+    for (const h of header){
+      const qp = new Uint16Array(h.nv*4), qn = new Int8Array(h.nv*4), idx = new Uint32Array(h.ni);
+      MeshoptDecoder.decodeVertexBuffer(new Uint8Array(qp.buffer), h.nv, 8, data.subarray(h.v[0], h.v[0]+h.v[1]));
+      MeshoptDecoder.decodeVertexBuffer(new Uint8Array(qn.buffer), h.nv, 4, data.subarray(h.n[0], h.n[0]+h.n[1]));
+      MeshoptDecoder.decodeIndexBuffer(new Uint8Array(idx.buffer), h.ni, 4, data.subarray(h.i[0], h.i[0]+h.i[1]));
+      const pos = new Float32Array(h.nv*3), nor = new Float32Array(h.nv*3);
+      for (let v=0; v<h.nv; v++) for (let c=0; c<3; c++){
+        pos[v*3+c] = h.min[c] + qp[v*4+c]/h.q*(h.max[c]-h.min[c]);
+        nor[v*3+c] = qn[v*4+c]/127;
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+      g.setAttribute('normal', new THREE.BufferAttribute(nor,3));
+      g.setIndex(new THREE.BufferAttribute(h.nv > 65535 ? idx : Uint16Array.from(idx), 1));
+      g.computeBoundingSphere();
+      lib.set(h.k, g);
     }
-    return f;
-  }
-  if (typeof WorkerGlobalScope !== 'undefined') {
-    onmessage = e => { const {id,name,args,bmin,bmax,res} = e.data; const f = buildField(BONES[name](...args),bmin,bmax,res); postMessage({id,f},[f.buffer]); };
-  }
-  `;
-
-  // ---- field providers: Web Workers in parallel, main-thread fallback ----
-  let fieldFor, stopWorkers = ()=>{};
-  try {
-    const url = URL.createObjectURL(new Blob([SDF_LIB], { type:'text/javascript' }));
-    const nW = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
-    const workers = Array.from({ length:nW }, ()=> new Worker(url));
-    const pending = new Map(); let rid = 0;
-    workers.forEach(w=> w.onmessage = e=>{ const r = pending.get(e.data.id); pending.delete(e.data.id); r(e.data.f); });
-    fieldFor = (name,args,bmin,bmax,res)=> new Promise(ok=>{ const id = ++rid; pending.set(id, ok); workers[id % nW].postMessage({ id,name,args,bmin,bmax,res }); });
-    stopWorkers = ()=>{ workers.forEach(w=>w.terminate()); URL.revokeObjectURL(url); };
-  } catch (e) {
-    const lib = new Function(SDF_LIB + '; return { BONES, buildField };')();
-    fieldFor = (name,args,bmin,bmax,res)=> new Promise(ok=> setTimeout(()=> ok(lib.buildField(lib.BONES[name](...args),bmin,bmax,res)), 0));
-  }
-
-  const mcPool = {};
-  function meshFromField(field, bmin, bmax, res, mat=boneMat){
-    const mc = mcPool[res] || (mcPool[res] = new MarchingCubes(res, mat, false, false, 160000));
-    mc.reset(); mc.field.set(field); mc.isolation = 0; mc.update();
-    const cx=(bmin[0]+bmax[0])/2, cy=(bmin[1]+bmax[1])/2, cz=(bmin[2]+bmax[2])/2;
-    const hx=(bmax[0]-bmin[0])/2, hy=(bmax[1]-bmin[1])/2, hz=(bmax[2]-bmin[2])/2;
-    const cnt=mc.count, P=mc.positionArray, Nn=mc.normalArray;
-    const pos=new Float32Array(cnt*3), nor=new Float32Array(cnt*3);
-    for(let v=0; v<cnt*3; v+=3){
-      pos[v]=cx+P[v]*hx; pos[v+1]=cy+P[v+1]*hy; pos[v+2]=cz+P[v+2]*hz;
-      const nx=Nn[v]/hx, ny=Nn[v+1]/hy, nz=Nn[v+2]/hz, l=Math.hypot(nx,ny,nz)||1;   // gradient → world normal on a stretched grid
-      nor[v]=nx/l; nor[v+1]=ny/l; nor[v+2]=nz/l;
-    }
-    const g=new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(pos,3));
-    g.setAttribute('normal', new THREE.BufferAttribute(nor,3));
-    g.computeBoundingSphere();
-    return new THREE.Mesh(g, mat);
-  }
-  const builds = [];
-  function bone3d(parent, name, args, bmin, bmax, res, place){
-    builds.push(fieldFor(name, args, bmin, bmax, res).then(f=>{
-      const m = meshFromField(f, bmin, bmax, res); if (place) place(m); parent.add(m);
-    }));
+    return lib;
+  });
+  bonesReady.catch(e=> console.warn('Falha ao carregar os ossos 3D:', e));
+  function bone3d(parent, key, place){
+    bonesReady.then(lib=>{
+      const g = lib.get(key); if (!g) return console.warn('osso ausente em bones.bin:', key);
+      const m = new THREE.Mesh(g, boneMat); if (place) place(m); parent.add(m);
+    });
   }
 
   /* =========================================================
@@ -939,18 +796,13 @@ function init(){
 
   // --- shoulder girdle: scapula, spine, acromion, coracoid, glenoid, clavicle ---
   const girdle = new THREE.Group(); girdle.position.y = 4.3; root.add(girdle);
-  const scapShape = new THREE.Shape();
-  scapShape.moveTo(-.32,.22); scapShape.quadraticCurveTo(-1.0,.5,-1.85,.42);
-  scapShape.quadraticCurveTo(-1.75,-1.0,-1.45,-2.25); scapShape.quadraticCurveTo(-.9,-1.0,-.36,-.28);
-  scapShape.quadraticCurveTo(-.28,0,-.32,.22);
-  const scapPoly = scapShape.getPoints(10).map(v=>[v.x,v.y]).filter((p,i,a)=>{ const q=a[(i+a.length-1)%a.length]; return Math.hypot(p[0]-q[0],p[1]-q[1])>1e-4; });
-  bone3d(girdle, 'girdle', [scapPoly], [-2.32,-2.42,-.62], [.32,.78,.48], 112);
+  bone3d(girdle, 'girdle');
 
   // --- humerus ---
   const shoulder = new THREE.Group(); girdle.add(shoulder);
   const HUM = 3.4;
   const distY = -.18 - HUM + .1;
-  bone3d(shoulder, 'humerus', [], [-.44,-3.82,-.38], [.62,.3,.38], 104);
+  bone3d(shoulder, 'humerus');
 
   // upper arm skin
   const uaPts=[]; for(let i=0;i<=44;i++){ const t=i/44; const y=lerp(-HUM-.4,.55,t);
@@ -964,10 +816,10 @@ function init(){
   const forearm = new THREE.Group(); elbow.add(forearm);         // pronation / supination axis
   const WRIST_Y = -3.0;
   const raX = .19;
-  const CUT = -.3;                                                // radial neck (keep in sync with SDF_LIB)
+  const CUT = -.3;                                                // radial neck (keep in sync with tools/bones-sdf.mjs)
 
-  bone3d(forearm, 'ulna', [], [-.44,-3.18,-.34], [.22,.52,.32], 104);
-  bone3d(forearm, 'radiusShaft', [], [-.05,-3.22,-.24], [.56,-.18,.24], 104);
+  bone3d(forearm, 'ulna');
+  bone3d(forearm, 'radiusShaft');
   const marker = new THREE.Object3D(); marker.position.set(raX, CUT, .02); forearm.add(marker);
 
   // callus (appears on consolidation)
@@ -979,8 +831,8 @@ function init(){
   const frag = new THREE.Group(); frag.position.set(raX, CUT, 0); forearm.add(frag);
   const headA = new THREE.Group(), headB = new THREE.Group(); frag.add(headA, headB);
   const toFrag = m => m.position.set(-raX, -CUT, 0);
-  bone3d(headA, 'headA', [], [-.05,-.46,-.22], [.44,.02,.26], 56, toFrag);
-  bone3d(headB, 'headB', [], [-.05,-.46,-.22], [.44,.02,.26], 56, toFrag);
+  bone3d(headA, 'headA', toFrag);
+  bone3d(headB, 'headB', toFrag);
 
   // forearm skin
   const faPts=[]; for(let i=0;i<=44;i++){ const t=i/44; const y=lerp(WRIST_Y-.15,.45,t);
@@ -991,9 +843,9 @@ function init(){
 
   // --- wrist + hand ---
   const wrist = new THREE.Group(); wrist.position.y = WRIST_Y - .08; forearm.add(wrist);
-  bone3d(wrist, 'carpals', [], [-.26,-.43,-.13], [.37,.03,.17], 60);   // scaphoid, lunate, triquetrum, pisiform, trapezium, trapezoid, capitate, hamate
+  bone3d(wrist, 'carpals');   // scaphoid, lunate, triquetrum, pisiform, trapezium, trapezoid, capitate, hamate
   const palmSkin = sphere(1, .02,-.78,0, .45,.62,.17, skinMat); wrist.add(palmSkin);
-  const handBone = (parent, L, s, distal=false)=> bone3d(parent, 'hand', [L,s,distal], [-.11,-L-.06,-.1], [.11,.06,.11], 40);
+  const handBone = (parent, L, s, distal=false)=> bone3d(parent, `hand:${L},${s},${distal}`);   // chave igual à do bake
 
   const fingers = [];
   const FX = [.21,.07,-.07,-.21], ML = [.72,.75,.68,.6], PL = [[.42,.27,.2],[.47,.3,.21],[.44,.29,.2],[.34,.21,.18]];
@@ -1024,8 +876,6 @@ function init(){
     thumb.rotation.x = -.35 - c*.5; thumb.rotation.z = .62 - c*.35;
     thumbSegs[0].rotation.x = -c*.7; thumbSegs[1].rotation.x = -c*1.0;
   }
-
-  Promise.all(builds).then(()=>{ stopWorkers(); Object.values(mcPool).forEach(mc=>mc.geometry.dispose()); });
 
   /* ---------- fracture FX ---------- */
   const glowMat = makeGlow(0xff4a3d);
@@ -1123,6 +973,7 @@ function init(){
   const clock = new THREE.Clock();
   function frame(){
     requestAnimationFrame(frame);
+    if (!visible) return;                                  // fora da tela: nada de CPU/GPU
     const t = clock.getElapsedTime();
     prog += (target - prog) * (reduce ? 1 : 0.075);
     if (!Number.isFinite(prog)) prog = 0;
@@ -1278,7 +1129,7 @@ function init(){
       c.el.style.translate = `0 ${dy.toFixed(1)}px`;
     }
 
-    if(visible) composer.render();
+    composer.render();
   }
   frame();
 }

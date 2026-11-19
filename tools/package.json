@@ -1,0 +1,12 @@
+{
+  "name": "landfisio-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bake": "node bake-bones.mjs"
+  },
+  "dependencies": {
+    "meshoptimizer": "^1.3.0",
+    "three": "0.160.0"
+  }
+}
