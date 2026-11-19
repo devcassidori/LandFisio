@@ -5,9 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vanessa Oliveira · Fisioterapeuta</title>
 <meta name="description" content="Fisioterapeuta especialista em traumato-ortopedia, pós-operatório e coluna. Avaliação detalhada e tratamento individual para você voltar a se mover sem dor.">
+<meta name="theme-color" content="#04070d">
+<meta name="color-scheme" content="dark light">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Vanessa Oliveira · Fisioterapeuta">
+<meta property="og:title" content="Vanessa Oliveira · Fisioterapeuta">
+<meta property="og:description" content="Fisioterapia em traumato-ortopedia, pós-operatório e coluna. Avaliação detalhada e plano individual para você voltar a se mover sem dor.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%2304070d'/%3E%3Cpath d='M14 9c2.5 0 3.5 2 3.5 4v14c0 2-1 4-3.5 4M26 9c-2.5 0-3.5 2-3.5 4v14c0 2 1 4 3.5 4' fill='none' stroke='%23e9f1f7' stroke-width='1.6'/%3E%3Cpath d='M17.5 20h5' stroke='%238fe9ff' stroke-width='1.6'/%3E%3C/svg%3E">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Physiotherapy","name":"Vanessa Oliveira · Fisioterapeuta",
+ "description":"Fisioterapia em traumato-ortopedia, pós-operatório, coluna e postura.",
+ "medicalSpecialty":["Musculoskeletal","Physiotherapy"],
+ "openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"07:00","closes":"20:00"},
+  {"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"08:00","closes":"12:00"}]}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- import map ANTES de qualquer modulepreload: em navegadores mais antigos um mapa que chega depois é ignorado -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<!-- 3D: baixa modelo e módulos em paralelo, sem esperar a cadeia de imports -->
+<link rel="preload" href="assets/bones.bin" as="fetch" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/RenderPass.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/OutputPass.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/Pass.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/ShaderPass.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/MaskPass.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/shaders/CopyShader.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/shaders/LuminosityHighPassShader.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/shaders/OutputShader.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/meshopt_decoder.module.js" crossorigin>
 <style>
 :root{
   --ink:#04070d;
@@ -32,6 +70,13 @@ body{background:var(--ink);color:#e9f1f7;font-family:var(--sans);font-weight:400
 a{color:inherit;text-decoration:none}
 em{font-family:var(--serif);font-style:italic;font-weight:400}
 img{max-width:100%;display:block}
+::selection{background:var(--ice);color:var(--ink)}
+:focus-visible{outline:2px solid var(--ice);outline-offset:3px;border-radius:6px}
+.light-wrap :focus-visible{outline-color:#1f6f8b}
+.btn:focus-visible{outline-offset:4px;border-radius:999px}
+section[id]{scroll-margin-top:72px}
+.skip{position:fixed;left:16px;top:-80px;z-index:100;padding:12px 18px;border-radius:999px;background:var(--ice);color:var(--ink);font-weight:600;font-size:14px;transition:top .3s var(--ease)}
+.skip:focus{top:16px}
 
 /* ---------- NAV ---------- */
 .nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:22px clamp(16px,4vw,56px);transition:background .5s var(--ease),color .5s var(--ease),padding .5s var(--ease),backdrop-filter .5s}
@@ -84,15 +129,17 @@ img{max-width:100%;display:block}
 /* ---------- STORY (3D) ---------- */
 .story{position:relative;height:520vh}
 .sticky{position:sticky;top:0;width:100%;height:100vh;height:100dvh;overflow:hidden}
-#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* canvas com altura estável (lvh): a barra de endereço do celular não redimensiona o WebGL a cada rolagem */
+#scene{position:absolute;left:0;top:0;width:100%;height:100vh;height:100lvh;display:block;opacity:0;transition:opacity 1.4s var(--ease)}
+#scene.ready{opacity:1}
 .vignette{position:absolute;inset:0;pointer-events:none;background:
   radial-gradient(ellipse 95% 100% at 62% 50%,transparent 55%,rgba(4,7,13,.6) 100%),
   linear-gradient(180deg,rgba(4,7,13,.45),transparent 16%,transparent 84%,rgba(4,7,13,.75));}
 .grid{position:absolute;inset:0;pointer-events:none;opacity:.5;
   background-image:linear-gradient(var(--line-dark) 1px,transparent 1px),linear-gradient(90deg,var(--line-dark) 1px,transparent 1px);
   background-size:80px 80px;mask-image:radial-gradient(ellipse 85% 90% at 60% 50%,#000 25%,transparent 95%);-webkit-mask-image:radial-gradient(ellipse 85% 90% at 60% 50%,#000 25%,transparent 95%)}
-.flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 62% 55%,rgba(201,245,255,.9),rgba(143,233,255,.25) 30%,transparent 65%);mix-blend-mode:screen}
-.grain{position:absolute;inset:-50%;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+.flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 62% 55%,rgba(201,245,255,.75),rgba(143,233,255,.18) 30%,transparent 65%)}
+.grain{position:absolute;inset:-50%;pointer-events:none;opacity:.035;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation:grain 1s steps(6) infinite}
 @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
@@ -349,6 +396,7 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
 <body>
 
 <!-- ============ NAV ============ -->
+<a class="skip" href="#sobre">Pular para o conteúdo</a>
 <div class="progress" id="progress" aria-hidden="true"></div>
 <header class="nav" id="nav">
   <a href="#top" class="brand" aria-label="Vanessa Oliveira, fisioterapeuta: início">
@@ -495,14 +543,14 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
     <div class="kicker reveal">Depoimentos</div>
     <h2 class="h-sec split">Quem voltou a se <em>mover</em>.</h2>
     <div class="quotes">
-      <figure data-spot class="quote big reveal beam"><div class="stars">★★★★★</div><blockquote>“Fraturei a cabeça do rádio numa queda de bike e mal conseguia girar o antebraço. Hoje já voltei a praticar Jiu-Jitsu normalmente.”</blockquote><footer><div class="av">L</div><div>Lucas C.<span>Fratura da cabeça do rádio</span></div></footer></figure>
-      <figure data-spot class="quote reveal d1"><div class="stars">★★★★★</div><blockquote>“Atenção total em cada sessão. Eu entendia o porquê de cada exercício.”</blockquote><footer><div class="av">C</div><div>Camila S.<span>Pós-op. de LCA</span></div></footer></figure>
-      <figure data-spot class="quote reveal d2"><div class="stars">★★★★★</div><blockquote>“Dez anos de dor lombar e, finalmente, um tratamento que funcionou.”</blockquote><footer><div class="av">J</div><div>João P.<span>Lombalgia crônica</span></div></footer></figure>
+      <figure data-spot class="quote big reveal beam"><div class="stars" role="img" aria-label="5 de 5 estrelas">★★★★★</div><blockquote>“Fraturei a cabeça do rádio numa queda de bike e mal conseguia girar o antebraço. Hoje já voltei a praticar Jiu-Jitsu normalmente.”</blockquote><footer><div class="av">L</div><div>Lucas C.<span>Fratura da cabeça do rádio</span></div></footer></figure>
+      <figure data-spot class="quote reveal d1"><div class="stars" role="img" aria-label="5 de 5 estrelas">★★★★★</div><blockquote>“Atenção total em cada sessão. Eu entendia o porquê de cada exercício.”</blockquote><footer><div class="av">C</div><div>Camila S.<span>Pós-op. de LCA</span></div></footer></figure>
+      <figure data-spot class="quote reveal d2"><div class="stars" role="img" aria-label="5 de 5 estrelas">★★★★★</div><blockquote>“Dez anos de dor lombar e, finalmente, um tratamento que funcionou.”</blockquote><footer><div class="av">J</div><div>João P.<span>Lombalgia crônica</span></div></footer></figure>
     </div>
   </section>
 
   <!-- ============ FAQ ============ -->
-  <section class="block" style="padding-top:0">
+  <section class="block" id="duvidas" style="padding-top:0">
     <div class="faq">
       <div>
         <div class="kicker reveal">Dúvidas</div>
@@ -536,17 +584,10 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
   <div class="foot"><span>© 2026 Vanessa Oliveira, Fisioterapeuta · CREFITO-0 000000-F</span><span>Responsável técnica: Drª Vanessa Oliveira</span></div>
 </section>
 
-<a class="wa-float" id="wa" href="https://wa.me/5500000000000" target="_blank" rel="noopener" aria-label="WhatsApp">
+<a class="wa-float" id="wa" href="https://wa.me/5500000000000" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.6 11.6 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.4-.3z"/></svg>
 </a>
 
-<link rel="preload" href="assets/bones.bin" as="fetch" crossorigin>
-<script type="importmap">
-{ "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-} }
-</script>
 
 <script>
 /* ---------- UI: reveals, split text, counters, nav ---------- */
@@ -605,7 +646,10 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
   }
   const bar=document.getElementById('progress');
   const onProgress=()=>{ const max=document.documentElement.scrollHeight-innerHeight; bar.style.transform='scaleX('+(max>0?scrollY/max:0)+')'; };
-  addEventListener('scroll',onProgress,{passive:true}); addEventListener('resize',onProgress); onProgress();
+  let ticking=false;   // um único update por quadro, não um por evento de scroll
+  const onFrame=()=>{ ticking=false; onScroll(); onProgress(); };
+  const schedule=()=>{ if(!ticking){ ticking=true; requestAnimationFrame(onFrame); } };
+  addEventListener('scroll',schedule,{passive:true}); addEventListener('resize',schedule); onProgress();
 
   // pointer-driven FX only on real mice and when motion is allowed
   const fine = matchMedia('(hover:hover) and (pointer:fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -620,7 +664,7 @@ details p{margin-top:16px;font-size:15px;line-height:1.75;color:var(--muted);max
     });
   }
 
-  addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  onScroll();
 })();
 </script>
 
@@ -645,7 +689,10 @@ try {
 if (renderer) init();
 
 function init(){
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  // nitidez limitada em telas de toque (GPU de celular) e reduzida sozinha se o FPS cair
+  let dpr = Math.min(devicePixelRatio || 1, matchMedia('(pointer:coarse)').matches ? 1.5 : 2);
+  renderer.setPixelRatio(dpr);
+  canvas.addEventListener('webglcontextlost', e=> e.preventDefault());
   renderer.setClearColor(0x04070d, 1);
 
   const scene = new THREE.Scene();
@@ -681,7 +728,7 @@ function init(){
       return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
                  mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z); }
     void main(){
-      float f = 1.0 - abs(dot(normalize(vN), normalize(vV)));
+      float f = clamp(1.0 - abs(dot(normalize(vN), normalize(vV))), 0.0, 1.0);   // clamp: pow() de negativo = NaN = pixel preto no bloom
       float trab = noise(vL*uNoise)*.6 + noise(vL*uNoise*2.7+3.1)*.4;
       float rim = .5*pow(f, uPow*.5) + .95*pow(f, uPow*2.2);
       float a = uBase*(.35 + 1.3*trab) + rim * uEdge * (.8 + .4*trab);
@@ -756,18 +803,22 @@ function init(){
      Os ossos são esculpidos por campos de distância (tools/bones-sdf.mjs) e pré-calculados
      com tools/bake-bones.mjs em assets/bones.bin (malhas simplificadas, quantizadas e
      comprimidas com meshoptimizer). Aqui só baixamos e decodificamos — sem cálculo pesado. */
+  // WebAssembly (rápido) quando permitido; se a CSP do host bloquear, cai para o decodificador em JS puro
+  const decoderReady = MeshoptDecoder.ready.then(()=>MeshoptDecoder,
+    ()=> import('./assets/meshopt-decoder-js.mjs').then(m=>m.MeshoptDecoder));
+
   const bonesReady = Promise.all([
     fetch('assets/bones.bin').then(r=>{ if(!r.ok) throw new Error('bones.bin ' + r.status); return r.arrayBuffer(); }),
-    MeshoptDecoder.ready
-  ]).then(([buf])=>{
+    decoderReady
+  ]).then(([buf, Dec])=>{
     const hl = new DataView(buf).getUint32(0, true);
     const header = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, hl)));
     const data = new Uint8Array(buf, 4 + hl), lib = new Map();
     for (const h of header){
       const qp = new Uint16Array(h.nv*4), qn = new Int8Array(h.nv*4), idx = new Uint32Array(h.ni);
-      MeshoptDecoder.decodeVertexBuffer(new Uint8Array(qp.buffer), h.nv, 8, data.subarray(h.v[0], h.v[0]+h.v[1]));
-      MeshoptDecoder.decodeVertexBuffer(new Uint8Array(qn.buffer), h.nv, 4, data.subarray(h.n[0], h.n[0]+h.n[1]));
-      MeshoptDecoder.decodeIndexBuffer(new Uint8Array(idx.buffer), h.ni, 4, data.subarray(h.i[0], h.i[0]+h.i[1]));
+      Dec.decodeVertexBuffer(new Uint8Array(qp.buffer), h.nv, 8, data.subarray(h.v[0], h.v[0]+h.v[1]));
+      Dec.decodeVertexBuffer(new Uint8Array(qn.buffer), h.nv, 4, data.subarray(h.n[0], h.n[0]+h.n[1]));
+      Dec.decodeIndexBuffer(new Uint8Array(idx.buffer), h.ni, 4, data.subarray(h.i[0], h.i[0]+h.i[1]));
       const pos = new Float32Array(h.nv*3), nor = new Float32Array(h.nv*3);
       for (let v=0; v<h.nv; v++) for (let c=0; c<3; c++){
         pos[v*3+c] = h.min[c] + qp[v*4+c]/h.q*(h.max[c]-h.min[c]);
@@ -782,7 +833,8 @@ function init(){
     }
     return lib;
   });
-  bonesReady.catch(e=> console.warn('Falha ao carregar os ossos 3D:', e));
+  bonesReady.catch(e=> console.warn('Falha ao carregar os ossos 3D:', e))
+    .finally(()=> requestAnimationFrame(()=> requestAnimationFrame(()=> canvas.classList.add('ready'))));   // aparece já com o esqueleto, sem "pop"
   function bone3d(parent, key, place){
     bonesReady.then(lib=>{
       const g = lib.get(key); if (!g) return console.warn('osso ausente em bones.bin:', key);
@@ -921,7 +973,7 @@ function init(){
     uniforms:{ uOpacity:{value:1} },
     vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
     fragmentShader:`uniform float uOpacity; varying vec2 vUv;
-      void main(){ float x=1.-abs(vUv.x-.5)*2.; float y=1.-abs(vUv.y-.5)*2.;
+      void main(){ float x=max(1.-abs(vUv.x-.5)*2.,0.); float y=max(1.-abs(vUv.y-.5)*2.,0.);
         float a=(pow(y,14.)*1.2 + pow(y,3.)*.18) * pow(x,1.5) * uOpacity;
         gl_FragColor=vec4(vec3(.56,.91,1.)*a, a); }`,
     transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.DoubleSide
@@ -936,15 +988,18 @@ function init(){
   composer.addPass(new OutputPass());
 
   /* ---------- layout ---------- */
-  let W=1, H=1, aspect=1, wide=true;
-  function resize(){
-    W = canvas.clientWidth || innerWidth || 1; H = canvas.clientHeight || innerHeight || 1; aspect = W/H; wide = aspect > 1.05;
-    renderer.setSize(W, H, false); composer.setSize(W, H);
+  let W=1, H=1, aspect=1, wide=true, visible=true, drawFrame=null;
+  function resize(force){
+    const w = canvas.clientWidth || innerWidth || 1, h = canvas.clientHeight || innerHeight || 1;
+    if (!force && w === W && h === H) return;                 // nada mudou: não limpa o canvas à toa
+    W = w; H = h; aspect = W/H; wide = aspect > 1.05;
+    renderer.setSize(W, H, false); composer.setPixelRatio(dpr); composer.setSize(W, H);
     bloom.resolution.set(W, H);
     camera.aspect = aspect; camera.updateProjectionMatrix();
+    if (drawFrame && visible) drawFrame();                    // redesenha na hora: setSize apaga o canvas (era o quadro preto)
   }
-  addEventListener('resize', resize); resize();
-  new ResizeObserver(resize).observe(canvas);
+  addEventListener('resize', ()=>resize()); resize(true);
+  new ResizeObserver(()=>resize()).observe(canvas);
 
   /* ---------- input ---------- */
   let target = 0, prog = 0;
@@ -967,13 +1022,20 @@ function init(){
   const cRed = new THREE.Color(0xff4a3d), cIce = new THREE.Color(0x8fe9ff), tmpC = new THREE.Color();
   const camTarget = new THREE.Vector3(), tmpV = new THREE.Vector3();
 
-  let visible = true;
   new IntersectionObserver(([e])=>{ visible = e.isIntersecting; }).observe(story);
 
   const clock = new THREE.Clock();
-  function frame(){
+  let slow = 0, lastNow = performance.now();
+  function frame(now){
     requestAnimationFrame(frame);
+    const dt = (now - lastNow) / 1000; lastNow = now;
     if (!visible) return;                                  // fora da tela: nada de CPU/GPU
+    // FPS baixo por ~2 s seguidos → reduz a resolução interna um degrau (nunca abaixo de 1×)
+    if (dt > 0 && dt < .25){ slow = dt > 1/40 ? slow + 1 : Math.max(0, slow - 2);
+      if (slow > 120 && dpr > 1){ dpr = Math.max(1, dpr - .25); renderer.setPixelRatio(dpr); slow = 0; resize(true); } }
+    draw();
+  }
+  function draw(){
     const t = clock.getElapsedTime();
     prog += (target - prog) * (reduce ? 1 : 0.075);
     if (!Number.isFinite(prog)) prog = 0;
@@ -1131,7 +1193,8 @@ function init(){
 
     composer.render();
   }
-  frame();
+  drawFrame = draw;
+  requestAnimationFrame(frame);
 }
 </script>
 </body>

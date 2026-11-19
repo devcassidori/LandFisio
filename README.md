@@ -44,7 +44,8 @@ Qualquer servidor estático funciona (`python -m http.server`, Live Server do VS
 .
 ├── index.html          # página completa: HTML + CSS + JS (UI e cena 3D)
 ├── assets/
-│   └── bones.bin       # malhas dos ossos pré-calculadas (≈345 KB, meshoptimizer)
+│   ├── bones.bin       # malhas dos ossos pré-calculadas (≈345 KB, meshoptimizer)
+│   └── meshopt-decoder-js.mjs  # decodificador em JS puro, usado só se o host bloquear WebAssembly
 ├── tools/
 │   ├── bones-sdf.mjs   # SDFs que esculpem cada osso (fonte do modelo)
 │   ├── bake-bones.mjs  # gera assets/bones.bin
@@ -70,7 +71,7 @@ Dentro do `index.html`:
 |---|---|
 | **Three.js 0.160.0** (jsDelivr, via import map) | Renderização WebGL, geometrias procedurais |
 | `EffectComposer` + `UnrealBloomPass` + `OutputPass` | Brilho (bloom) do raio-x |
-| `MeshoptDecoder` (addon) | Decodifica as malhas pré-calculadas dos ossos (`assets/bones.bin`) |
+| `MeshoptDecoder` (addon) | Decodifica as malhas pré-calculadas dos ossos (`assets/bones.bin`); se a CSP do host bloquear WebAssembly, usa `assets/meshopt-decoder-js.mjs` |
 | GLSL customizado (`ShaderMaterial`) | Material de raio-x, brilhos e linha do scanner |
 | CSS puro | Layout, animações de entrada, grão de filme |
 | `IntersectionObserver` | Reveals das seções e pausa da renderização fora da tela |
